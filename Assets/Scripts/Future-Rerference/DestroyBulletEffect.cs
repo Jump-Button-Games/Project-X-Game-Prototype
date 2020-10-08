@@ -9,7 +9,7 @@
 
 public class DestroyBulletEffect : MonoBehaviour {
 
-    private float clipTime;
+    /*private float clipTime;
 
     private Animator animator;
     private AnimationClip[] clips;
@@ -32,7 +32,7 @@ public class DestroyBulletEffect : MonoBehaviour {
                     break;
             }
         }
-    }
+    }*/
 
     void Update()
     {

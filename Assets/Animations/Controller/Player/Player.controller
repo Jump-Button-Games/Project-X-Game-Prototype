@@ -226,7 +226,7 @@ AnimatorState:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Crounh
+  m_Name: Crouch
   m_Speed: 1
   m_CycleOffset: 0
   m_Transitions: []
@@ -311,26 +311,26 @@ AnimatorStateMachine:
   m_ChildStates:
   - serializedVersion: 1
     m_State: {fileID: 7355964376502711283}
-    m_Position: {x: -2970, y: 900, z: 0}
+    m_Position: {x: -2400, y: 910, z: 0}
   - serializedVersion: 1
     m_State: {fileID: 6834245530704084464}
-    m_Position: {x: -2680, y: 900, z: 0}
+    m_Position: {x: -2110, y: 910, z: 0}
   - serializedVersion: 1
     m_State: {fileID: -7229582992380833570}
-    m_Position: {x: -2680, y: 790, z: 0}
+    m_Position: {x: -2110, y: 800, z: 0}
   - serializedVersion: 1
     m_State: {fileID: -8229292245733760509}
-    m_Position: {x: -2970, y: 980, z: 0}
+    m_Position: {x: -2390, y: 990, z: 0}
   - serializedVersion: 1
     m_State: {fileID: 6806968012656587612}
-    m_Position: {x: -3260, y: 870, z: 0}
+    m_Position: {x: -2640, y: 890, z: 0}
   m_ChildStateMachines: []
   m_AnyStateTransitions: []
   m_EntryTransitions: []
   m_StateMachineTransitions: {}
   m_StateMachineBehaviours: []
-  m_AnyStatePosition: {x: -2970, y: 690, z: 0}
-  m_EntryPosition: {x: -2970, y: 790, z: 0}
-  m_ExitPosition: {x: -2670, y: 690, z: 0}
+  m_AnyStatePosition: {x: -2400, y: 700, z: 0}
+  m_EntryPosition: {x: -2400, y: 800, z: 0}
+  m_ExitPosition: {x: -2100, y: 700, z: 0}
   m_ParentStateMachinePosition: {x: 800, y: 20, z: 0}
   m_DefaultState: {fileID: 7355964376502711283}

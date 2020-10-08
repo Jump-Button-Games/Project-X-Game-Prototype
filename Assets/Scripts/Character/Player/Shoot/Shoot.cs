@@ -9,23 +9,37 @@ public class Shoot : MonoBehaviour
 
 	private Animator animator;
 
+	[Header("Player Input Controls")]
+	private PlayerInputContoller playerInputController;
+
 	void Awake()
 	{
+		// Add controls to the registry
+		playerInputController = new PlayerInputContoller();
+		playerInputController.Player.Shoot.performed += _ => ShootWeapon();
+		playerInputController.Player.Shoot.canceled += ctx => isShooting = false;
+
 		animator = GetComponent<Animator> ();
 	}
-	
-	void Update () {
 
-		/*if (Input.GetButtonDown("Fire1"))
+	void OnEnable()
+	{
+		playerInputController.Enable();
+	}
+
+	void OnDisable()
+	{
+		playerInputController.Disable();
+	}
+
+	void Update () 
+	{
+
+		if (isShooting == false)
 		{
-			ShootWeapon();
-		}
-		else {
-			isShooting = false;
 			animator.SetBool("shooting", isShooting);
 		}
-*/
-	}
+    }
 
 	void ShootWeapon ()
 	{
