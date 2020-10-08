@@ -181,11 +181,12 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3997447873036177698}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 14025b6cf85a45676a5799b66b933af8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isShooting: 0
   firePoint: {fileID: 3997447872552927336}
   bulletPrefab: {fileID: 7012640712688164712, guid: f8e418d36f722e7c1b029c339cdabcfd, type: 3}
 --- !u!114 &1049536980505927126
@@ -200,13 +201,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5c0a5192985a0e3458e80505cf384d46, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  movSpeed: 6
-  airMovSpeed: 0
-  movAccel: 7
-  airMovAccel: 0
-  initialJumpForce: 4
-  holdJumpForce: 4
-  maxJumpTime: 0.25
-  groundCastRadius: 0.2
-  groundCastDist: 0.54
-  gravityMultiplier: 1.2
+  movementAcceleration: 0.5
+  movementSpeed: 6
+  airMovementAcceleration: 0
+  airMovementSpeed: 0
+  jumpForce: 8.5
+  holdingJumpForce: 0
+  maxJumpTime: 0.15
+  isJumping: 0
+  gravityMultiplier: 0.35
+  facingRight: 1
+  groundCastRadius: 0.01
+  groundCastDistance: 0.75
+  isGrounded: 1

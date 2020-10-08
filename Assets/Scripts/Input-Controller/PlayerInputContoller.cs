@@ -32,7 +32,7 @@ public class @PlayerInputContoller : IInputActionCollection, IDisposable
                     ""id"": ""15ddcbba-78ca-43b6-9200-956fc2ae9c57"",
                     ""expectedControlType"": ""Button"",
                     ""processors"": """",
-                    ""interactions"": ""Press,Hold""
+                    ""interactions"": """"
                 },
                 {
                     ""name"": ""Shoot"",

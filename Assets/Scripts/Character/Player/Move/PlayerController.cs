@@ -1,55 +1,90 @@
 ﻿using System.Collections;
 using UnityEngine;
+using UnityEngine.InputSystem.Interactions;
 
 public class PlayerController : MonoBehaviour
 {
 
-    [Header("Movement")]
-    [SerializeField] float movSpeed = 6;            //The movement speed when grounded
-    [SerializeField] float airMovSpeed;             //The movement speed when in the air
-    [SerializeField] float movAccel = 7;            //The maximum change in velocity the player can do on the ground. This determines how responsive the character will be when on the ground.
-    [SerializeField] float airMovAccel;             //The maximum change in velocity the player can do in the air. This determines how responsive the character will be in the air.
+    [Header("Player Movement")]
 
-    [Header("Jump")]
-    [SerializeField] float initialJumpForce = 5;        //The force applied to the player when starting to jump
-    [SerializeField] float holdJumpForce = 5;           //The force applied to the character when holding the jump button
-    [SerializeField] float maxJumpTime = 5;             //The maximum amount of time the player can hold the jump button
+    [Tooltip("Maximum Velocity Change Player Can Perform On The Ground. Determines Responsiveness Of Player On The Ground.")]
+    [SerializeField] float movementAcceleration = 7;
 
-    [Header("Ground Detection")]
-    [SerializeField] float groundCastRadius = 0.2f;        //Radius of the circle when doing the circle cast to check for the ground
-    [SerializeField] float groundCastDist = 0.54f;          //Distance of the circle cast
+    [Tooltip("Player Movement Speed When On The Ground.")]
+    [SerializeField] float movementSpeed = 6;
 
-    [Header("Misc")]
+    [Tooltip("Maximum Velocity Change Player Can Perform In The Ground. Determines Responsiveness Of Player In The Air.")]
+    [SerializeField] float airMovementAcceleration = 0;             
+
+    [Tooltip("Player Movement Speed When In The Air.")]
+    [SerializeField] float airMovementSpeed = 0;
+
+    
+
+    [Header("Player Jump")]
+
+    [Tooltip("Force Applied To Player When Tapping Jump. Starts The Initial Jump.")]
+    [SerializeField] float jumpForce = 5;
+
+    [Tooltip("Force Applied To Player When Holding Jump Button. Continues The Jump While Jump Button Is Held Down.")]
+    [SerializeField] float holdingJumpForce = 5;
+
+    [Tooltip("Maximum Amount Of Time That Force Is Continually Applied To The Player. Only Applies When Jump Button Is Held Down.")]
+    [SerializeField] float maxJumpTime = 5;
+
+    [Tooltip("Tracks Whether The Player Is Currently Jumping. Currently When Jump Button Is Pressed Then Value Is True And When Jump Button Is Released Then Value Is False.")]
+    [SerializeField] bool isJumping = false;
+
+
+
+    [Header("Player Gravity Controls")]
+
+    [Tooltip("Changes How To Player Is Affected By Gravity. This Overrides The Default Value Set By The Physics Engine.")]
     [SerializeField] float gravityMultiplier = 1f;
 
+
+
+    [Header("Player Facing Direction")]
+
+    [Tooltip("Tracks Which Way The Player Is Currently Facing. Value Is True If Facing Right And False If Facing Left.")]
+    [SerializeField] bool facingRight = true;
+
+
+
+    [Header("Ground Detection")]
+
+    [Tooltip("Determines The Size Of The Radius For The Circle. The Circle Cast Is Used To Detect Whether The Player Is In Contact With The Ground Or Not. Currently Casts From The Players" +
+        "transform.position But May Be Better To Create An Empty Object And Position The Circle Cast Manaully.")]
+    [SerializeField] float groundCastRadius = 0.2f;
+
+    [Tooltip("The Distance To Cast The Circle")]
+    [SerializeField] float groundCastDistance = 0.54f;
+
+    [Tooltip("Tracks Whether The Player Is Currently On The Ground Or Not. Value Is True If Player Is On The Ground And False If Not.")]
+    [SerializeField] bool isGrounded;
+
+    [Header("Movement Animation Controls")]
+    Animator animator;
+
     [Header("Player Input Controls")]
-    private PlayerInputContoller playerInputController;
+    PlayerInputContoller playerInputController;
 
     [Header("Player Physics")]
-    private Rigidbody2D rb2d;
-
-    private Animator animator;
-
-    private bool isGrounded;
-
-    private bool facingRight = true;
-
-    private bool isJumping;
+    Rigidbody2D rb2d;
 
     void Awake()
     {
         playerInputController = new PlayerInputContoller();
 
         // Add controls to the registry
-
-        // Horizontal Movement Controls
         playerInputController.Player.Move.performed += ctx => Move(ctx.ReadValue<Vector2>());
 
-        // Jumping Controls
-        // Top action here may be able to go into a if statement
-        playerInputController.Player.Jump.performed += _ => Jump(); // Should be associated with the Interaction "Press"
-        playerInputController.Player.Jump.started += ctx => isJumping = true;
-        playerInputController.Player.Jump.canceled += ctx => isJumping = false;
+        // Default Interaction Is Press
+        // Therefore OnButtonDown Call Jump Method
+        playerInputController.Player.Jump.performed += _ => Jump();
+
+        /*playerInputController.Player.Jump.started += ctx => isJumping = true;
+        playerInputController.Player.Jump.canceled += ctx => isJumping = false;*/
     }
 
     void Start()
@@ -70,13 +105,13 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
-
         rb2d.AddForce(gravityMultiplier * Physics2D.gravity * rb2d.mass, ForceMode2D.Force);
 
         isGrounded = DoGroundCheck();
 
-        Move(playerInputController.Player.Move.ReadValue<Vector2>());
+        animator.SetBool("grounded", isGrounded);
 
+        Move(playerInputController.Player.Move.ReadValue<Vector2>());
     }
 
     void Move(Vector2 movementDirection)
@@ -88,13 +123,13 @@ public class PlayerController : MonoBehaviour
         groundDir.x *= -1; //Vector2.Perpendicular rotates the vector 90 degrees counter clockwise, inverting X. So here we invert X back to normal
 
         //The velocity we want our character to have. We get the movement direction, the ground direction and the speed we want (ground speed or air speed)
-        Vector2 targetVelocity = groundDir * movementDirection * (isGrounded ? movSpeed : airMovSpeed);
+        Vector2 targetVelocity = groundDir * movementDirection * (isGrounded ? movementSpeed : airMovementSpeed);
 
         //The change in velocity we need to perform to achieve our target velocity
         Vector2 velocityDelta = targetVelocity - velocity;
 
         //The maximum change in velocity we can do
-        float maxDelta = isGrounded ? movAccel : airMovAccel;
+        float maxDelta = isGrounded ? movementAcceleration : airMovementAcceleration;
 
         //Clamp the velocity delta to our maximum velocity change
         velocityDelta.x = Mathf.Clamp(velocityDelta.x, -maxDelta, maxDelta);
@@ -130,7 +165,7 @@ public class PlayerController : MonoBehaviour
         //has its origin inside the player's collider.
         RaycastHit2D[] hits = new RaycastHit2D[2];
 
-        if (Physics2D.CircleCast(transform.position, groundCastRadius, Vector3.down, new ContactFilter2D(), hits, groundCastDist) > 1)
+        if (Physics2D.CircleCast(transform.position, groundCastRadius, Vector3.down, new ContactFilter2D(), hits, groundCastDistance) > 1)
         {
             return hits[1].normal;
         }
@@ -140,15 +175,16 @@ public class PlayerController : MonoBehaviour
 
     void Jump()
     {
+        Debug.Log("Jumping");
 
         if (!isGrounded)
         {
             return;
         }
 
-        rb2d.AddForce(Vector2.up * initialJumpForce * rb2d.mass, ForceMode2D.Impulse);
+        rb2d.AddForce(Vector2.up * jumpForce * rb2d.mass, ForceMode2D.Impulse);
 
-        StartCoroutine(JumpCoroutine());
+        // StartCoroutine(JumpCoroutine());
     }
 
     IEnumerator JumpCoroutine()
@@ -167,7 +203,7 @@ public class PlayerController : MonoBehaviour
             // isJumping show be true when the jump button is held down
             wantsToJump = isJumping;
 
-            rb2d.AddForce(Vector3.up * holdJumpForce * rb2d.mass * maxJumpTime / jumpTimeCounter);
+            rb2d.AddForce(Vector3.up * holdingJumpForce * rb2d.mass * maxJumpTime / jumpTimeCounter);
 
             yield return null;
         }
@@ -175,7 +211,6 @@ public class PlayerController : MonoBehaviour
 
     void Flip()
     {
-        
         facingRight = !facingRight;
 
         transform.Rotate(0f, 180f, 0f);

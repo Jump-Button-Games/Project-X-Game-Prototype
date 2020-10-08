@@ -106,7 +106,7 @@ Rigidbody2D:
   m_Interpolate: 0
   m_SleepingMode: 1
   m_CollisionDetection: 0
-  m_Constraints: 4
+  m_Constraints: 5
 --- !u!58 &2133912720512569039
 CircleCollider2D:
   m_ObjectHideFlags: 0
@@ -136,7 +136,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   jumpForce: 50
-  maxHeight: 2
   timeBeforeJumpStarts: 0.1
   rateOfJump: 2
   rb2d: {fileID: 2133912720512569027}

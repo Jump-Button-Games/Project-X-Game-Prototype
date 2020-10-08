@@ -2,15 +2,20 @@
 
 public class Shoot : MonoBehaviour
 {
-    public Transform firePoint;
-	public GameObject bulletPrefab;
-
-	private bool isShooting = false;
-
-	private Animator animator;
+	[Header("Shooting Controls")]
+	[SerializeField] bool isShooting = false;
 
 	[Header("Player Input Controls")]
-	private PlayerInputContoller playerInputController;
+	PlayerInputContoller playerInputController;
+
+	[Header("Shooting Animation Controls")]
+	Animator animator;
+
+	[Header("Point Of Firing Object")]
+	public Transform firePoint;
+
+	[Header("Bullet To Be Fired")]
+	public GameObject bulletPrefab;
 
 	void Awake()
 	{
@@ -34,7 +39,6 @@ public class Shoot : MonoBehaviour
 
 	void Update () 
 	{
-
 		if (isShooting == false)
 		{
 			animator.SetBool("shooting", isShooting);
