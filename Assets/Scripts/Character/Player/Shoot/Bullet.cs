@@ -2,23 +2,29 @@
 
 public class Bullet : MonoBehaviour
 {
-	[SerializeField]
-    private readonly float speed = 15f;
 
-	[SerializeField]
-	private readonly int damage = 40;
+	[Header("Bullet Movement")]
 
+	[Tooltip("The velocity of the bullet")]
+	[SerializeField] float speed = 60f;
+
+
+	[Header("Bullet Damage Dealt")]
+
+	[Tooltip("The amount of damage the bullet does to the recieving character")]
+	[SerializeField] int damage = 40;
+
+	[Header("Bullet Physics")]
+
+	[Tooltip("Attach the rigidbody of the bullet here")]
 	public Rigidbody2D rb2d;
+
+	[Header("Impact Effect")]
+	[Tooltip("The object which contains the bullet impact effect animation")]
 	public GameObject impactEffect;
 
-	private Animator animator;
-
-	void Awake()
+	void Start () 
 	{
-		animator = GetComponent<Animator>();
-	}
-
-	void Start () {
 		rb2d.velocity = transform.right * speed;
 	}
 

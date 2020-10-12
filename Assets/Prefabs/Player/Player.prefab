@@ -205,11 +205,11 @@ MonoBehaviour:
   movementSpeed: 6
   airMovementAcceleration: 0
   airMovementSpeed: 0
-  jumpForce: 8.5
+  jumpForce: 10
   holdingJumpForce: 0
-  maxJumpTime: 0.15
+  maxJumpTime: 0.25
   isJumping: 0
-  gravityMultiplier: 0.35
+  gravityMultiplier: 0.2
   facingRight: 1
   groundCastRadius: 0.01
   groundCastDistance: 0.75

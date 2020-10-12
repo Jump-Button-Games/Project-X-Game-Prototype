@@ -1,6 +1,5 @@
 ﻿using System.Collections;
 using UnityEngine;
-using UnityEngine.InputSystem.Interactions;
 
 public class PlayerController : MonoBehaviour
 {
@@ -78,13 +77,7 @@ public class PlayerController : MonoBehaviour
 
         // Add controls to the registry
         playerInputController.Player.Move.performed += ctx => Move(ctx.ReadValue<Vector2>());
-
-        // Default Interaction Is Press
-        // Therefore OnButtonDown Call Jump Method
         playerInputController.Player.Jump.performed += _ => Jump();
-
-        /*playerInputController.Player.Jump.started += ctx => isJumping = true;
-        playerInputController.Player.Jump.canceled += ctx => isJumping = false;*/
     }
 
     void Start()
