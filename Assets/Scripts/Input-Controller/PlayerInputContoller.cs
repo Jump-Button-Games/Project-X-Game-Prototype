@@ -35,9 +35,25 @@ public class @PlayerInputContoller : IInputActionCollection, IDisposable
                     ""interactions"": """"
                 },
                 {
-                    ""name"": ""Shoot"",
+                    ""name"": ""SingleShot"",
                     ""type"": ""Button"",
                     ""id"": ""b7a208e1-02f6-4130-b369-c1b4e96b54f8"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """"
+                },
+                {
+                    ""name"": ""BurstShot"",
+                    ""type"": ""Button"",
+                    ""id"": ""c15e0580-1116-42cc-b5f8-be750efa5dc0"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """"
+                },
+                {
+                    ""name"": ""ContinuousShot"",
+                    ""type"": ""Button"",
+                    ""id"": ""5d6af001-b9b5-4492-a7bb-2820fec28651"",
                     ""expectedControlType"": ""Button"",
                     ""processors"": """",
                     ""interactions"": """"
@@ -117,7 +133,7 @@ public class @PlayerInputContoller : IInputActionCollection, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": ""Keyboard and Mouse"",
-                    ""action"": ""Shoot"",
+                    ""action"": ""SingleShot"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -128,7 +144,29 @@ public class @PlayerInputContoller : IInputActionCollection, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": ""Keyboard and Mouse"",
-                    ""action"": ""Shoot"",
+                    ""action"": ""SingleShot"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""a028d82f-b390-4bd1-8678-28afdab23a0d"",
+                    ""path"": ""<Keyboard>/b"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard and Mouse"",
+                    ""action"": ""BurstShot"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""287bc26b-a766-430f-a93e-9ba36836c51d"",
+                    ""path"": ""<Mouse>/leftButton"",
+                    ""interactions"": ""Hold"",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard and Mouse"",
+                    ""action"": ""ContinuousShot"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -158,7 +196,9 @@ public class @PlayerInputContoller : IInputActionCollection, IDisposable
         m_Player = asset.FindActionMap("Player", throwIfNotFound: true);
         m_Player_Move = m_Player.FindAction("Move", throwIfNotFound: true);
         m_Player_Jump = m_Player.FindAction("Jump", throwIfNotFound: true);
-        m_Player_Shoot = m_Player.FindAction("Shoot", throwIfNotFound: true);
+        m_Player_SingleShot = m_Player.FindAction("SingleShot", throwIfNotFound: true);
+        m_Player_BurstShot = m_Player.FindAction("BurstShot", throwIfNotFound: true);
+        m_Player_ContinuousShot = m_Player.FindAction("ContinuousShot", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -210,14 +250,18 @@ public class @PlayerInputContoller : IInputActionCollection, IDisposable
     private IPlayerActions m_PlayerActionsCallbackInterface;
     private readonly InputAction m_Player_Move;
     private readonly InputAction m_Player_Jump;
-    private readonly InputAction m_Player_Shoot;
+    private readonly InputAction m_Player_SingleShot;
+    private readonly InputAction m_Player_BurstShot;
+    private readonly InputAction m_Player_ContinuousShot;
     public struct PlayerActions
     {
         private @PlayerInputContoller m_Wrapper;
         public PlayerActions(@PlayerInputContoller wrapper) { m_Wrapper = wrapper; }
         public InputAction @Move => m_Wrapper.m_Player_Move;
         public InputAction @Jump => m_Wrapper.m_Player_Jump;
-        public InputAction @Shoot => m_Wrapper.m_Player_Shoot;
+        public InputAction @SingleShot => m_Wrapper.m_Player_SingleShot;
+        public InputAction @BurstShot => m_Wrapper.m_Player_BurstShot;
+        public InputAction @ContinuousShot => m_Wrapper.m_Player_ContinuousShot;
         public InputActionMap Get() { return m_Wrapper.m_Player; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -233,9 +277,15 @@ public class @PlayerInputContoller : IInputActionCollection, IDisposable
                 @Jump.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnJump;
                 @Jump.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnJump;
                 @Jump.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnJump;
-                @Shoot.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnShoot;
-                @Shoot.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnShoot;
-                @Shoot.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnShoot;
+                @SingleShot.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnSingleShot;
+                @SingleShot.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnSingleShot;
+                @SingleShot.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnSingleShot;
+                @BurstShot.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnBurstShot;
+                @BurstShot.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnBurstShot;
+                @BurstShot.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnBurstShot;
+                @ContinuousShot.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnContinuousShot;
+                @ContinuousShot.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnContinuousShot;
+                @ContinuousShot.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnContinuousShot;
             }
             m_Wrapper.m_PlayerActionsCallbackInterface = instance;
             if (instance != null)
@@ -246,9 +296,15 @@ public class @PlayerInputContoller : IInputActionCollection, IDisposable
                 @Jump.started += instance.OnJump;
                 @Jump.performed += instance.OnJump;
                 @Jump.canceled += instance.OnJump;
-                @Shoot.started += instance.OnShoot;
-                @Shoot.performed += instance.OnShoot;
-                @Shoot.canceled += instance.OnShoot;
+                @SingleShot.started += instance.OnSingleShot;
+                @SingleShot.performed += instance.OnSingleShot;
+                @SingleShot.canceled += instance.OnSingleShot;
+                @BurstShot.started += instance.OnBurstShot;
+                @BurstShot.performed += instance.OnBurstShot;
+                @BurstShot.canceled += instance.OnBurstShot;
+                @ContinuousShot.started += instance.OnContinuousShot;
+                @ContinuousShot.performed += instance.OnContinuousShot;
+                @ContinuousShot.canceled += instance.OnContinuousShot;
             }
         }
     }
@@ -266,6 +322,8 @@ public class @PlayerInputContoller : IInputActionCollection, IDisposable
     {
         void OnMove(InputAction.CallbackContext context);
         void OnJump(InputAction.CallbackContext context);
-        void OnShoot(InputAction.CallbackContext context);
+        void OnSingleShot(InputAction.CallbackContext context);
+        void OnBurstShot(InputAction.CallbackContext context);
+        void OnContinuousShot(InputAction.CallbackContext context);
     }
 }

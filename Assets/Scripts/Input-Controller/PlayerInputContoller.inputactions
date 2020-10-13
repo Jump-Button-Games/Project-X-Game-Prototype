@@ -22,9 +22,25 @@
                     "interactions": ""
                 },
                 {
-                    "name": "Shoot",
+                    "name": "SingleShot",
                     "type": "Button",
                     "id": "b7a208e1-02f6-4130-b369-c1b4e96b54f8",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": ""
+                },
+                {
+                    "name": "BurstShot",
+                    "type": "Button",
+                    "id": "c15e0580-1116-42cc-b5f8-be750efa5dc0",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": ""
+                },
+                {
+                    "name": "ContinuousShot",
+                    "type": "Button",
+                    "id": "5d6af001-b9b5-4492-a7bb-2820fec28651",
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": ""
@@ -104,7 +120,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "Keyboard and Mouse",
-                    "action": "Shoot",
+                    "action": "SingleShot",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -115,7 +131,29 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "Keyboard and Mouse",
-                    "action": "Shoot",
+                    "action": "SingleShot",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "a028d82f-b390-4bd1-8678-28afdab23a0d",
+                    "path": "<Keyboard>/b",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard and Mouse",
+                    "action": "BurstShot",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "287bc26b-a766-430f-a93e-9ba36836c51d",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "Hold",
+                    "processors": "",
+                    "groups": "Keyboard and Mouse",
+                    "action": "ContinuousShot",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
