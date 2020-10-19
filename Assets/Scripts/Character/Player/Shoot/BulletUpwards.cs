@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 
-public class Bullet : MonoBehaviour
-{ 
+public class BulletUpwards : MonoBehaviour
+{
 	[Header("Bullet Movement")]
 
 	[Tooltip("The velocity of the bullet")]
@@ -13,6 +13,7 @@ public class Bullet : MonoBehaviour
 	[Tooltip("The amount of damage the bullet does to the recieving character")]
 	[SerializeField] int damage = 40;
 
+
 	[Header("Bullet Physics")]
 
 	[Tooltip("Attach the rigidbody of the bullet here")]
@@ -22,23 +23,27 @@ public class Bullet : MonoBehaviour
 	[Tooltip("The object which contains the bullet impact effect animation")]
 	public GameObject bulletImpactEffect;
 
-	void Start () 
+	void Start()
 	{
-		rb2d.velocity = transform.right * speed;
+		rb2d.velocity = transform.up * speed;
+
+		// Rotate bullet so it faces correct way when shooting upwards
+		transform.Rotate(0,0,90);
 	}
 
 	// For later on, have a onCollide method which checks if the walls or ceiling was hit
 	// then play impact animation and destroy the bullet
 
-	void OnTriggerEnter2D (Collider2D hitInfo)
+	void OnTriggerEnter2D(Collider2D hitInfo)
 	{
 		Enemy enemy = hitInfo.GetComponent<Enemy>();
-        
+
 		if (enemy != null)
 		{
 			enemy.TakeDamage(damage);
 			Instantiate(bulletImpactEffect, transform.position, transform.rotation);
 			Destroy(gameObject);
 		}
+		
 	}
 }
