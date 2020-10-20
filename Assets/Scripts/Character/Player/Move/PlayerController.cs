@@ -32,6 +32,9 @@ public class PlayerController : PhysicsObject
     [Tooltip("Static variable which tracks whether the player is in shooting upwards animation. This variable will be read by the Shoot script")]
     public static bool facingUpwards = false;
 
+    [Tooltip("Static variable which tracks whether the player is in crouching animation. This variable will be read by the Shoot script")]
+    public static bool crouching = false;
+
 
     [Header("Player Input Controls")]
     PlayerInputContoller playerInputController;
@@ -44,7 +47,9 @@ public class PlayerController : PhysicsObject
         playerInputController = new PlayerInputContoller();
 
         // Move Input Controls
-        playerInputController.Player.Move.performed += ctx => Move(ctx.ReadValue<Vector2>());
+
+        // This code not needed by the looks of it
+        //playerInputController.Player.Move.performed += ctx => Move(ctx.ReadValue<Vector2>());
 
         // Jump Input Controls
         playerInputController.Player.Jump.performed += _ => ActivateJump(); 
@@ -100,9 +105,8 @@ public class PlayerController : PhysicsObject
             Flip();
         }
 
-
-       // Shoot Upwards Controls
-        move.y = FaceUpwards(playerInputController.Player.Move.ReadValue<Vector2>());
+        // Controls for player facing upwards or crouching
+        move.y = VerticalDirection(playerInputController.Player.Move.ReadValue<Vector2>());
 
         // If 'W' is pressed
         if (move.y == 1)
@@ -114,6 +118,18 @@ public class PlayerController : PhysicsObject
         {
             facingUpwards = false;
             animator.SetBool("isFacingUpwards", facingUpwards);
+        }
+
+        // If 'S' is pressed
+        if (move.y == -1)
+        {
+            crouching = true;
+            animator.SetBool("isCrouching", crouching);
+        }
+        else
+        {
+            crouching = false;
+            animator.SetBool("isCrouching", crouching);
         }
 
         animator.SetBool("grounded", grounded);
@@ -143,7 +159,7 @@ public class PlayerController : PhysicsObject
         transform.Rotate(0f, 180f, 0f);
     }
 
-    float FaceUpwards(Vector2 direction)
+    float VerticalDirection(Vector2 direction)
     {
         return direction.y;
     }

@@ -13,10 +13,13 @@ public class Shoot : MonoBehaviour
 	[SerializeField] bool isShooting = false;
 
 
-	[Header("Shooting Direction")]
+	[Header("Player Shooting Position")]
 
-	[Tooltip("The point where the bullets instantiates when shooting upwards")]
+	[Tooltip("Tracks whether the player is facing upwards. The value for this variable originates in the PlayerController script")]
 	[SerializeField] bool isFacingUpwards = false;
+
+	[Tooltip("Tracks whether the player is crouching. The value for this variable originates in the PlayerController script")]
+	[SerializeField] bool isCrouching = false;
 
 
 	[Header("Single Shot Controls")]
@@ -67,26 +70,29 @@ public class Shoot : MonoBehaviour
 	[SerializeField] float nextContinuousShotTime = 0f;
 
 
-	[Header("Point Of Sideways Firing Object")]
+	[Header("Firepoints")]
 
 	[Tooltip("The point where the bullets instantiates when shooting sideways")]
 	public Transform firePointSideways;
 
-
-	[Header("Point Of Upwards Firing Object")]
-
 	[Tooltip("The point where the bullets instantiates when shooting upwards")]
 	public Transform firePointUpwards;
 
+	[Tooltip("The point where the bullets instantiates when shooting in a crouched position")]
+	public Transform firePointCrouching;
 
-	[Header("Bullet To Be Fired")]
+
+	[Header("Bullets To Be Fired")]
 
 	[Tooltip("This bullet moves in a sideways direction")]
 	public GameObject bulletSideways;
 
-	[Header("This bullet moves in an upwards direction")]
+	[Tooltip("This bullet moves in an upwards direction")]
 	public GameObject bulletUpwards;
 
+	[Tooltip("This bullet moves in an sideways direction but from a lower point")]
+	public GameObject bulletCrouching;
+	
 
 	[Header("Player Input Controls")]
 	PlayerInputContoller playerInputController;
@@ -138,25 +144,12 @@ public class Shoot : MonoBehaviour
 		// Temp code to show how burst shots works
 		overallGameTime = Time.time;
 
-		// Continously Check If Player Is Facing Upwards Or Not
+		// Continously Check Whether Player Is Facing Upwards Or Crouching
 		isFacingUpwards = PlayerController.facingUpwards;
+		isCrouching = PlayerController.crouching;
 
 		// Single Shot
-		if (isSingleShooting && Time.time > nextSingleShotTime && singleShotTime > 0 && !isFacingUpwards)
-		{
-			if (singleShotsRemaining > 0)
-			{
-				nextSingleShotTime = Time.time + singleShotTime;
-				SingleShot();
-				singleShotsRemaining--;
-			}
-			else
-			{
-				animator.SetBool("shooting", false);
-				ResetSingleShot();
-			}
-		}
-		else if (isSingleShooting && Time.time > nextSingleShotTime && singleShotTime > 0 && isFacingUpwards)
+		if (isSingleShooting && Time.time > nextSingleShotTime && singleShotTime > 0 && isFacingUpwards)
 		{
 			if (singleShotsRemaining > 0)
 			{
@@ -169,9 +162,63 @@ public class Shoot : MonoBehaviour
 				ResetSingleShot();
 			}
 		}
+		else if (isSingleShooting && Time.time > nextSingleShotTime && singleShotTime > 0 && isCrouching)
+		{
+			if (singleShotsRemaining > 0)
+			{
+				
+				nextSingleShotTime = Time.time + singleShotTime;
+				SingleShotCrouching();
+				singleShotsRemaining--;
+			}
+			else
+			{
+				ResetSingleShot();
+			}
+		}
+        else if (isSingleShooting && Time.time > nextSingleShotTime && singleShotTime > 0)
+        {
+            if (singleShotsRemaining > 0)
+            {
+                nextSingleShotTime = Time.time + singleShotTime;
+                SingleShot();
+                singleShotsRemaining--;
+            }
+            else
+            {
+                animator.SetBool("shooting", false);
+                ResetSingleShot();
+            }
+        }
 
-		// Burst Shot
-		if (isBurstShooting && Time.time > nextBurstShotTime && burstShotTime > 0 && !isFacingUpwards)
+        // Burst Shot
+		if (isBurstShooting && Time.time > nextBurstShotTime && burstShotTime > 0 && isFacingUpwards)
+		{
+			if (burstShotsRemaining > 0)
+			{
+				nextBurstShotTime = Time.time + burstShotTime;
+				BurstShotUpwards();
+				burstShotsRemaining--;
+			}
+			else
+			{
+				ResetBurstShot();
+			}
+		}
+		else if (isBurstShooting && Time.time > nextBurstShotTime && burstShotTime > 0 && isCrouching)
+		{
+			if (burstShotsRemaining > 0)
+			{
+				nextBurstShotTime = Time.time + burstShotTime;
+				BurstShotCrouching();
+				burstShotsRemaining--;
+			}
+			else
+			{
+				ResetBurstShot();
+			}
+		}
+		else if (isBurstShooting && Time.time > nextBurstShotTime && burstShotTime > 0)
 		{
 			if (burstShotsRemaining > 0)
 			{
@@ -185,31 +232,22 @@ public class Shoot : MonoBehaviour
 				ResetBurstShot();
 			}
 		}
-		else if (isBurstShooting && Time.time > nextBurstShotTime && burstShotTime > 0 && isFacingUpwards)
-		{
-			if (burstShotsRemaining > 0)
-			{
-				nextBurstShotTime = Time.time + burstShotTime;
-				BurstShotUpwards();
-				burstShotsRemaining--;
-			}
-			else
-			{
-				ResetBurstShot();
-			}
-		}
 
 		// Continuous Shot
-		if (isContinuouslyShooting && Time.time > nextContinuousShotTime && continousShotTime > 0 && !isFacingUpwards)
-		{
-
-			nextContinuousShotTime = Time.time + continousShotTime;
-			ContinuousShot();
-		}
-		else if (isContinuouslyShooting && Time.time > nextContinuousShotTime && continousShotTime > 0 && isFacingUpwards)
+		if (isContinuouslyShooting && Time.time > nextContinuousShotTime && continousShotTime > 0 && isFacingUpwards)
 		{
 			nextContinuousShotTime = Time.time + continousShotTime;
 			ContinuousShotUpwards();
+		}
+		else if (isContinuouslyShooting && Time.time > nextContinuousShotTime && continousShotTime > 0 && isCrouching)
+		{
+			nextContinuousShotTime = Time.time + continousShotTime;
+			ContinuousShotCrounching();
+		}
+		else if (isContinuouslyShooting && Time.time > nextContinuousShotTime && continousShotTime > 0)
+		{
+			nextContinuousShotTime = Time.time + continousShotTime;
+			ContinuousShot();
 		}
 
 		if (isShooting == false)
@@ -225,7 +263,6 @@ public class Shoot : MonoBehaviour
 		isSingleShooting = true;
 	}
 
-	// Single Shot Methods
 	void SingleShot()
     {
         Shot();
@@ -234,6 +271,12 @@ public class Shoot : MonoBehaviour
 	void SingleShotUpwards()
 	{
 		ShotUpwards();
+	}
+
+	// SingleShotCrouching
+	void SingleShotCrouching()
+	{
+		ShotCrouching();
 	}
 
 	void ResetSingleShot()
@@ -258,6 +301,11 @@ public class Shoot : MonoBehaviour
 		ShotUpwards();
 	}
 
+	void BurstShotCrouching()
+	{
+		ShotCrouching();
+	}
+
 	void ResetBurstShot()
 	{
 		isBurstShooting = false;
@@ -280,7 +328,12 @@ public class Shoot : MonoBehaviour
 		ShotUpwards();
 	}
 
-	// Generic Methods
+	void ContinuousShotCrounching()
+	{
+		ShotCrouching();
+	}
+
+	// Shot Methods
 	void Shot()
 	{
 		isShooting = true;
@@ -291,5 +344,10 @@ public class Shoot : MonoBehaviour
 	void ShotUpwards()
 	{
 		Instantiate(bulletUpwards, firePointUpwards.position, firePointUpwards.rotation);
+	}
+
+	void ShotCrouching()
+	{
+		Instantiate(bulletCrouching, firePointCrouching.position, firePointCrouching.rotation);
 	}
 }

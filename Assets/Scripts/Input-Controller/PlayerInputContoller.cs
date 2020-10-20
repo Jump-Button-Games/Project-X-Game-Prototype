@@ -163,7 +163,7 @@ public class @PlayerInputContoller : IInputActionCollection, IDisposable
                     ""name"": """",
                     ""id"": ""287bc26b-a766-430f-a93e-9ba36836c51d"",
                     ""path"": ""<Mouse>/leftButton"",
-                    ""interactions"": ""Hold"",
+                    ""interactions"": ""Hold(duration=5)"",
                     ""processors"": """",
                     ""groups"": ""Keyboard and Mouse"",
                     ""action"": ""ContinuousShot"",
