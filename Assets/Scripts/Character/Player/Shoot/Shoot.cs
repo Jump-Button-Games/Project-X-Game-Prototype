@@ -92,7 +92,19 @@ public class Shoot : MonoBehaviour
 
 	[Tooltip("This bullet moves in an sideways direction but from a lower point")]
 	public GameObject bulletCrouching;
-	
+
+
+	[Header("Camera Shake Controls")]
+
+	[Tooltip("The camera object which contains the script CameraShaker")]
+	public CameraShaker cameraShaker;
+
+	[Tooltip("The length of time in seconds the camera should shake for")]
+	[SerializeField] float shakeDuration = 0.1f;
+
+	[Tooltip("The distance the camera should shake for on each axis")]
+	[SerializeField] float shakeMagnitude = 0.1f;
+
 
 	[Header("Player Input Controls")]
 	PlayerInputContoller playerInputController;
@@ -155,6 +167,7 @@ public class Shoot : MonoBehaviour
 			{
 				nextSingleShotTime = Time.time + singleShotTime;
 				SingleShotUpwards();
+				CameraShake(shakeDuration, shakeMagnitude);
 				singleShotsRemaining--;
 			}
 			else
@@ -169,6 +182,7 @@ public class Shoot : MonoBehaviour
 				
 				nextSingleShotTime = Time.time + singleShotTime;
 				SingleShotCrouching();
+				CameraShake(shakeDuration, shakeMagnitude);
 				singleShotsRemaining--;
 			}
 			else
@@ -182,7 +196,8 @@ public class Shoot : MonoBehaviour
             {
                 nextSingleShotTime = Time.time + singleShotTime;
                 SingleShot();
-                singleShotsRemaining--;
+				CameraShake(shakeDuration, shakeMagnitude);
+				singleShotsRemaining--;
             }
             else
             {
@@ -198,6 +213,7 @@ public class Shoot : MonoBehaviour
 			{
 				nextBurstShotTime = Time.time + burstShotTime;
 				BurstShotUpwards();
+				CameraShake(shakeDuration, shakeMagnitude);
 				burstShotsRemaining--;
 			}
 			else
@@ -211,6 +227,7 @@ public class Shoot : MonoBehaviour
 			{
 				nextBurstShotTime = Time.time + burstShotTime;
 				BurstShotCrouching();
+				CameraShake(shakeDuration, shakeMagnitude);
 				burstShotsRemaining--;
 			}
 			else
@@ -224,6 +241,7 @@ public class Shoot : MonoBehaviour
 			{
 				nextBurstShotTime = Time.time + burstShotTime;
 				BurstShot();
+				CameraShake(shakeDuration, shakeMagnitude);
 				burstShotsRemaining--;
 			}
 			else
@@ -238,16 +256,19 @@ public class Shoot : MonoBehaviour
 		{
 			nextContinuousShotTime = Time.time + continousShotTime;
 			ContinuousShotUpwards();
+			CameraShake(shakeDuration, shakeMagnitude);
 		}
 		else if (isContinuouslyShooting && Time.time > nextContinuousShotTime && continousShotTime > 0 && isCrouching)
 		{
 			nextContinuousShotTime = Time.time + continousShotTime;
 			ContinuousShotCrounching();
+			CameraShake(shakeDuration, shakeMagnitude);
 		}
 		else if (isContinuouslyShooting && Time.time > nextContinuousShotTime && continousShotTime > 0)
 		{
 			nextContinuousShotTime = Time.time + continousShotTime;
 			ContinuousShot();
+			CameraShake(shakeDuration, shakeMagnitude);
 		}
 
 		if (isShooting == false)
@@ -349,5 +370,11 @@ public class Shoot : MonoBehaviour
 	void ShotCrouching()
 	{
 		Instantiate(bulletCrouching, firePointCrouching.position, firePointCrouching.rotation);
+	}
+
+	// Camera Shake Methods
+	void CameraShake(float shakeDuration, float shakeMagnitude)
+	{
+		StartCoroutine(cameraShaker.Shake(shakeDuration, shakeMagnitude));
 	}
 }
