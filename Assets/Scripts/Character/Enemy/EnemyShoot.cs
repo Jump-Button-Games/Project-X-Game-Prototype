@@ -21,7 +21,7 @@ public class EnemyShoot : MonoBehaviour
 	private readonly float timeBeforeShootingBegins = 2f;
 
 	[SerializeField]
-	private readonly float rateOfShooting = 4f;
+	private readonly float rateOfShooting = 2f;
 
 	private bool canShoot = false;
 
