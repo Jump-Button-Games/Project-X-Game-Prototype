@@ -70,6 +70,7 @@ public class PhysicsObject : MonoBehaviour
     void FixedUpdate()
     {
         velocity += gravityModifier * Physics2D.gravity * Time.deltaTime;
+
         velocity.x = targetVelocity.x;
 
         grounded = false;
