@@ -2,7 +2,7 @@ name: CI
 on: [push]
 
 env:
-  UNITY_LICENSE: .github/Unity_lic.ulf
+  UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
 
 jobs:
   build:
