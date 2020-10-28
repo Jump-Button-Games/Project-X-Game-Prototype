@@ -3,7 +3,6 @@ on: [push]
 jobs:
   build:
     runs-on: ubuntu-latest
-    container: gableroux/unity3d:2020.1.7f1
     steps:
         - name: Checkout Project
           uses: actions/checkout@v1
@@ -13,10 +12,13 @@ jobs:
           run: /opt/Unity/Editor/Unity -quit -batchmode -nographics -silent-crashes -logFile -manualLicenseFile .github/Unity_lic.ulf || exit 0
         
         # Build Windows and OSX
-        - name: Build Windows Player
-          run: /opt/Unity/Editor/Unity -quit -batchmode -nographics -silent-crashes -logFile -projectPath . -buildWindows64Player ./bin-win64/WinProjX.exe
-        - name: Build OSX Player
-          run: /opt/Unity/Editor/Unity -quit -batchmode -nographics -silent-crashes -logFile -projectPath . -buildOSXUniversalPlayer ./bin-osx/WinProjX.app      
+- uses: webbertakken/unity-builder@<version>
+  env:
+    UNITY_LICENSE: .github/Unity_lic.ulf
+  with:
+    projectPath: .
+    unityVersion: 2020.1.7f1
+    targetPlatform: StandaloneWindows64 
         
         - name: Archive Windows Build
           uses: actions/upload-artifact@v1
