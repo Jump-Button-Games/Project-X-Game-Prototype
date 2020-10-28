@@ -6,11 +6,7 @@ jobs:
     steps:
         - name: Checkout Project
           uses: actions/checkout@v1
-        
-        # Activate unity
-        - name: Activate Unity
-          run: /opt/Unity/Editor/Unity -quit -batchmode -nographics -silent-crashes -logFile -manualLicenseFile .github/Unity_lic.ulf || exit 0
-        
+                
         # Build Windows and OSX
 - uses: webbertakken/unity-builder@<version>
   env:
