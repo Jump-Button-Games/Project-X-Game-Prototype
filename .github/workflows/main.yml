@@ -6,7 +6,7 @@ env:
 
 jobs:
   build:
-    name: Build my project
+    name: Build Exes
     runs-on: ubuntu-latest
     steps:
       # Checkout
@@ -29,13 +29,6 @@ jobs:
           targetPlatform: StandaloneWindows64 
           customParameters: '-nographics'
 
-     # Output Windows
-      - uses: actions/upload-artifact@v1
-        with:
-          name: Build Windows
-          path: build
-
-
       # Build Linux
       - name: Build Linux project
         uses: webbertakken/unity-builder@v0.10
@@ -43,12 +36,6 @@ jobs:
           unityVersion: 2020.1.7f1
           targetPlatform: StandaloneLinux64
           customParameters: '-nographics'
-
-     # Output Linux
-      - uses: actions/upload-artifact@v1
-        with:
-          name: Build Linux
-          path: build
 
       # Build Mac
       - name: Build Mac project
@@ -58,8 +45,8 @@ jobs:
           targetPlatform: StandaloneOSX
           customParameters: '-nographics'
 
-     # Output Mac
+     # Output Builds
       - uses: actions/upload-artifact@v1
         with:
-          name: Build Mac
+          name: Builds
           path: build
