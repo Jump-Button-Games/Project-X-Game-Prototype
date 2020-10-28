@@ -26,7 +26,7 @@ jobs:
         uses: webbertakken/unity-builder@v0.10
         with:
           unityVersion: 2020.1.7f1
-          targetPlatform: StandaloneWindows64 
+          targetPlatform: -StandaloneWindows64 -StandaloneOSX
           customParameters: '-nographics'
 
      # Output
