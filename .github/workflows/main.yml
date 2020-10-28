@@ -15,12 +15,19 @@ jobs:
         with:
           lfs: true
 
+      # Cache
+      - uses: actions/cache@v1.1.0
+        with:
+          path: Library
+          key: Library
+
       # Build
       - name: Build project
         uses: webbertakken/unity-builder@v0.10
         with:
           unityVersion: 2020.1.7f1
           targetPlatform: StandaloneWindows64 
+          customParameters: '-nographics'
 
      # Output
       - uses: actions/upload-artifact@v1
