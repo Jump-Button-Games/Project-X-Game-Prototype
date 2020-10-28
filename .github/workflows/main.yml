@@ -1,29 +1,30 @@
 name: CI
 on: [push]
+
+env:
+  UNITY_LICENSE: .github/Unity_lic.ulf
+
 jobs:
   build:
+    name: Build my project
     runs-on: ubuntu-latest
     steps:
-        - name: Checkout Project
-          uses: actions/checkout@v1
-                
-        # Build Windows and OSX
-- uses: webbertakken/unity-builder@<version>
-  env:
-    UNITY_LICENSE: .github/Unity_lic.ulf
-  with:
-    projectPath: .
-    unityVersion: 2020.1.7f1
-    targetPlatform: StandaloneWindows64 
-        
-        - name: Archive Windows Build
-          uses: actions/upload-artifact@v1
-          with:
-            name: CISampleWin64Binary
-            path: ./bin-win64
+      # Checkout
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          lfs: true
 
-        - name: Archive Mac Build
-          uses: actions/upload-artifact@v1
-          with:
-            name: CISampleOSXBinary
+      # Build
+      - name: Build project
+        uses: webbertakken/unity-builder@v0.10
+        with:
+          unityVersion: 2019.2.11f1
+          targetPlatform: WebGL
+
+      # Output
+      - uses: actions/upload-artifact@v1
+        with:
+          name: Build
+          path: buildBinary
             path: ./bin-osx
