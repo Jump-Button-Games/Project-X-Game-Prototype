@@ -21,16 +21,45 @@ jobs:
           path: Library
           key: Library
 
-      # Build
+      # Build Windows
       - name: Build project
         uses: webbertakken/unity-builder@v0.10
         with:
           unityVersion: 2020.1.7f1
-          targetPlatform: -StandaloneWindows64 -StandaloneOSX
+          targetPlatform: StandaloneWindows64 
           customParameters: '-nographics'
 
-     # Output
+     # Output Windows
       - uses: actions/upload-artifact@v1
         with:
-          name: Build
-          path: build
+          name: Build Windows
+          path: buildWindows
+
+
+      # Build Linux
+      - name: Build project
+        uses: webbertakken/unity-builder@v0.10
+        with:
+          unityVersion: 2020.1.7f1
+          targetPlatform: StandaloneLinux64
+          customParameters: '-nographics'
+
+     # Output Linux
+      - uses: actions/upload-artifact@v1
+        with:
+          name: Build Linux
+          path: buildLinux
+
+      # Build Mac
+      - name: Build project
+        uses: webbertakken/unity-builder@v0.10
+        with:
+          unityVersion: 2020.1.7f1
+          targetPlatform: StandaloneOSX
+          customParameters: '-nographics'
+
+     # Output Mac
+      - uses: actions/upload-artifact@v1
+        with:
+          name: Build Mac
+          path: buildMac
