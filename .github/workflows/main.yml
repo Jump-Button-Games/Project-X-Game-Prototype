@@ -10,7 +10,7 @@ jobs:
         
         # Activate unity
         - name: Activate Unity
-          run: /opt/Unity/Editor/Unity -quit -batchmode -nographics -silent-crashes -logFile -manualLicenseFile .github/Unity_lic.ulf || exit 0
+          run: /opt/Unity/Editor/Unity -quit -batchmode -nographics -silent-crashes -logFile -manualLicenseFile .github/Unity_v2020.x.ulf || exit 0
         
         # Build Windows and OSX
         - name: Build Windows Player
