@@ -22,7 +22,7 @@ jobs:
           key: Library
 
       # Build Windows
-      - name: Build project
+      - name: Build Windows project
         uses: webbertakken/unity-builder@v0.10
         with:
           unityVersion: 2020.1.7f1
@@ -33,11 +33,11 @@ jobs:
       - uses: actions/upload-artifact@v1
         with:
           name: Build Windows
-          path: buildWindows
+          path: build
 
 
       # Build Linux
-      - name: Build project
+      - name: Build Linux project
         uses: webbertakken/unity-builder@v0.10
         with:
           unityVersion: 2020.1.7f1
@@ -48,10 +48,10 @@ jobs:
       - uses: actions/upload-artifact@v1
         with:
           name: Build Linux
-          path: buildLinux
+          path: build
 
       # Build Mac
-      - name: Build project
+      - name: Build Mac project
         uses: webbertakken/unity-builder@v0.10
         with:
           unityVersion: 2020.1.7f1
@@ -62,4 +62,4 @@ jobs:
       - uses: actions/upload-artifact@v1
         with:
           name: Build Mac
-          path: buildMac
+          path: build
