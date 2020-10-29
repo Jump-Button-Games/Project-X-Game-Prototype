@@ -16,7 +16,7 @@ public class PhysicsObject : MonoBehaviour
     [Header("Gravity Controls")]
 
     [Tooltip("Determines the amount that gravity affects the object")]
-    [SerializeField] float gravityModifier = 1f;
+    [SerializeField] protected float gravityModifier = 1f;
 
 
     [Header("Ground Detection")]
