@@ -49,7 +49,7 @@ public class CrabShoot : MonoBehaviour
 	}
 
 	// Shoot Methods
-
+	
 	void AllowedShoot()
 	{
 		canShoot = true;
