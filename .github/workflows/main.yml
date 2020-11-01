@@ -1,6 +1,4 @@
 name: CI
-on: [push]
-
 env:
   UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
 
