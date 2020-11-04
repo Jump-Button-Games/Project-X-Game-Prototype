@@ -44,6 +44,14 @@
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": ""
+                },
+                {
+                    "name": "ActivateStones",
+                    "type": "Button",
+                    "id": "b8321006-b31d-449b-9193-d290062f3ac9",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": ""
                 }
             ],
             "bindings": [
@@ -154,6 +162,17 @@
                     "processors": "",
                     "groups": "Keyboard and Mouse",
                     "action": "ContinuousShot",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "871c85a9-5435-41a8-95d0-2dcd17864405",
+                    "path": "<Keyboard>/1",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard and Mouse",
+                    "action": "ActivateStones",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

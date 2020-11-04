@@ -57,6 +57,14 @@ public class @PlayerInputContoller : IInputActionCollection, IDisposable
                     ""expectedControlType"": ""Button"",
                     ""processors"": """",
                     ""interactions"": """"
+                },
+                {
+                    ""name"": ""ActivateStones"",
+                    ""type"": ""Button"",
+                    ""id"": ""b8321006-b31d-449b-9193-d290062f3ac9"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """"
                 }
             ],
             ""bindings"": [
@@ -169,6 +177,17 @@ public class @PlayerInputContoller : IInputActionCollection, IDisposable
                     ""action"": ""ContinuousShot"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""871c85a9-5435-41a8-95d0-2dcd17864405"",
+                    ""path"": ""<Keyboard>/1"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard and Mouse"",
+                    ""action"": ""ActivateStones"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -199,6 +218,7 @@ public class @PlayerInputContoller : IInputActionCollection, IDisposable
         m_Player_SingleShot = m_Player.FindAction("SingleShot", throwIfNotFound: true);
         m_Player_BurstShot = m_Player.FindAction("BurstShot", throwIfNotFound: true);
         m_Player_ContinuousShot = m_Player.FindAction("ContinuousShot", throwIfNotFound: true);
+        m_Player_ActivateStones = m_Player.FindAction("ActivateStones", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -253,6 +273,7 @@ public class @PlayerInputContoller : IInputActionCollection, IDisposable
     private readonly InputAction m_Player_SingleShot;
     private readonly InputAction m_Player_BurstShot;
     private readonly InputAction m_Player_ContinuousShot;
+    private readonly InputAction m_Player_ActivateStones;
     public struct PlayerActions
     {
         private @PlayerInputContoller m_Wrapper;
@@ -262,6 +283,7 @@ public class @PlayerInputContoller : IInputActionCollection, IDisposable
         public InputAction @SingleShot => m_Wrapper.m_Player_SingleShot;
         public InputAction @BurstShot => m_Wrapper.m_Player_BurstShot;
         public InputAction @ContinuousShot => m_Wrapper.m_Player_ContinuousShot;
+        public InputAction @ActivateStones => m_Wrapper.m_Player_ActivateStones;
         public InputActionMap Get() { return m_Wrapper.m_Player; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -286,6 +308,9 @@ public class @PlayerInputContoller : IInputActionCollection, IDisposable
                 @ContinuousShot.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnContinuousShot;
                 @ContinuousShot.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnContinuousShot;
                 @ContinuousShot.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnContinuousShot;
+                @ActivateStones.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnActivateStones;
+                @ActivateStones.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnActivateStones;
+                @ActivateStones.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnActivateStones;
             }
             m_Wrapper.m_PlayerActionsCallbackInterface = instance;
             if (instance != null)
@@ -305,6 +330,9 @@ public class @PlayerInputContoller : IInputActionCollection, IDisposable
                 @ContinuousShot.started += instance.OnContinuousShot;
                 @ContinuousShot.performed += instance.OnContinuousShot;
                 @ContinuousShot.canceled += instance.OnContinuousShot;
+                @ActivateStones.started += instance.OnActivateStones;
+                @ActivateStones.performed += instance.OnActivateStones;
+                @ActivateStones.canceled += instance.OnActivateStones;
             }
         }
     }
@@ -325,5 +353,6 @@ public class @PlayerInputContoller : IInputActionCollection, IDisposable
         void OnSingleShot(InputAction.CallbackContext context);
         void OnBurstShot(InputAction.CallbackContext context);
         void OnContinuousShot(InputAction.CallbackContext context);
+        void OnActivateStones(InputAction.CallbackContext context);
     }
 }

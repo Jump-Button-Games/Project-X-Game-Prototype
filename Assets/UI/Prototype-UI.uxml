@@ -1,0 +1,5 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <ui:VisualElement name="VisualElement" style="left: auto; right: auto; height: 10%; width: 50%; opacity: 1; color: rgb(255, 255, 255);">
+        <ui:Label text="Stone Counter: 0" display-tooltip-when-elided="True" name="Stone-Counter-Label" style="width: 30%; height: 50%; font-size: 30px; opacity: 1; color: rgb(255, 255, 255); -unity-font-style: bold; margin-left: 5%; margin-top: 5%;" />
+    </ui:VisualElement>
+</ui:UXML>
