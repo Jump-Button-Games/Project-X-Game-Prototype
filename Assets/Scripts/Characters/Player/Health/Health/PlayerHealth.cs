@@ -1,11 +1,15 @@
 ﻿using UnityEngine;
+using UnityEngine.UIElements;
 
 public class PlayerHealth : MonoBehaviour
 {
 	[Header("Player Health Stats")]
 
 	[Tooltip("The amount of health the player has remaining")]
-	[SerializeField] int health = 100;
+	[SerializeField] int currentHealth = 100;
+
+	[Tooltip("The maximum amount of health the player can have")]
+	[SerializeField] int maxHealth = 100;
 
 
 	[Header("Player Invincibilty Controls")]
@@ -48,6 +52,22 @@ public class PlayerHealth : MonoBehaviour
 	[Tooltip("The script to access the player fade methods")]
 	public PlayerFade playerFade;
 
+
+	[Header("UI Controls")]
+
+	[Tooltip("The UI Document contains information about the visual elments shown on screen")]
+	public UIDocument uiDocument;
+
+	[Tooltip("The label gets updated when the players health changes")]
+	Label healthLabel;
+
+	void OnEnable()
+	{
+		VisualElement rootVisualElement = uiDocument.rootVisualElement;
+
+		healthLabel = rootVisualElement.Q<Label>("Health-Label");
+	}
+
 	void Awake()
 	{
 		animator = GetComponent<Animator>();
@@ -82,7 +102,10 @@ public class PlayerHealth : MonoBehaviour
 		{
 			animator.SetBool("isHit", EnemyBullet.hitPlayer);
 		}
-		
+
+
+		// Update the UI
+		healthLabel.text = $"Health: {currentHealth}";
 	}
 
 	// Player Hit And Damage Methods
@@ -90,9 +113,9 @@ public class PlayerHealth : MonoBehaviour
 	{
 		if (!invincible)
 		{
-			health -= damage;
+			currentHealth -= damage;
 
-			if (health <= 0)
+			if (currentHealth <= 0)
 			{
 				Die();
 			}
@@ -120,6 +143,24 @@ public class PlayerHealth : MonoBehaviour
 	void ResetInvincibility()
 	{
 		invincible = false;
+	}
+
+	// Player Health Increase Methods
+
+	public void IncreaseHealth(int healthIncrease)
+	{
+
+		int healthDeficit = maxHealth - currentHealth;
+
+		if (healthDeficit < healthIncrease || healthDeficit == healthIncrease)
+		{
+			currentHealth = maxHealth;
+		}
+		else if (healthDeficit > healthIncrease)
+		{
+			currentHealth += healthIncrease;
+		}
+		
 	}
 
 }
