@@ -21,12 +21,17 @@ public class StoneManager : MonoBehaviour
         // Query for the label by the label name
         stoneCounterLabel = rootVisualElement.Q<Label>("Stone-Counter-Label");
 
+        stoneCounterLabel.text = $"Stones: {stoneCounter}";
+
     }
 
     void Update()
     {
         // Update the GUI with the lastest value of the stoneCounter variable
-        stoneCounterLabel.text = $"{stoneType}: {stoneCounter}";
+        if (stoneCounter > 0)
+        {
+            stoneCounterLabel.text = $"{stoneType}: {stoneCounter}";
+        }
     }
 
     public static void IncrementStoneCounter()

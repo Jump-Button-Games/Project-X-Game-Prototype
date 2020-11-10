@@ -65,6 +65,14 @@ public class @PlayerInputContoller : IInputActionCollection, IDisposable
                     ""expectedControlType"": ""Button"",
                     ""processors"": """",
                     ""interactions"": """"
+                },
+                {
+                    ""name"": ""SelectGun"",
+                    ""type"": ""Button"",
+                    ""id"": ""816ec301-b3a1-441e-bf0d-89df4ad518e6"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """"
                 }
             ],
             ""bindings"": [
@@ -136,17 +144,6 @@ public class @PlayerInputContoller : IInputActionCollection, IDisposable
                 },
                 {
                     ""name"": """",
-                    ""id"": ""5f8ffcac-95a9-49f5-82b1-317807e4c7a4"",
-                    ""path"": ""<Keyboard>/f"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": ""Keyboard and Mouse"",
-                    ""action"": ""SingleShot"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
                     ""id"": ""1bfd5161-a1ab-47b1-8409-b526b8e4e634"",
                     ""path"": ""<Mouse>/leftButton"",
                     ""interactions"": """",
@@ -169,9 +166,20 @@ public class @PlayerInputContoller : IInputActionCollection, IDisposable
                 },
                 {
                     ""name"": """",
+                    ""id"": ""c720aabc-853e-4e54-9262-5d7ebcc98659"",
+                    ""path"": ""<Mouse>/leftButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard and Mouse"",
+                    ""action"": ""BurstShot"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
                     ""id"": ""287bc26b-a766-430f-a93e-9ba36836c51d"",
                     ""path"": ""<Mouse>/leftButton"",
-                    ""interactions"": ""Hold(duration=1.5)"",
+                    ""interactions"": ""Hold(duration=0.3)"",
                     ""processors"": """",
                     ""groups"": ""Keyboard and Mouse"",
                     ""action"": ""ContinuousShot"",
@@ -186,6 +194,17 @@ public class @PlayerInputContoller : IInputActionCollection, IDisposable
                     ""processors"": """",
                     ""groups"": ""Keyboard and Mouse"",
                     ""action"": ""ActivateStones"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""19cb575a-5cbd-42bb-b4d5-492590ce804f"",
+                    ""path"": ""<Keyboard>/f"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard and Mouse"",
+                    ""action"": ""SelectGun"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -219,6 +238,7 @@ public class @PlayerInputContoller : IInputActionCollection, IDisposable
         m_Player_BurstShot = m_Player.FindAction("BurstShot", throwIfNotFound: true);
         m_Player_ContinuousShot = m_Player.FindAction("ContinuousShot", throwIfNotFound: true);
         m_Player_ActivateStones = m_Player.FindAction("ActivateStones", throwIfNotFound: true);
+        m_Player_SelectGun = m_Player.FindAction("SelectGun", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -274,6 +294,7 @@ public class @PlayerInputContoller : IInputActionCollection, IDisposable
     private readonly InputAction m_Player_BurstShot;
     private readonly InputAction m_Player_ContinuousShot;
     private readonly InputAction m_Player_ActivateStones;
+    private readonly InputAction m_Player_SelectGun;
     public struct PlayerActions
     {
         private @PlayerInputContoller m_Wrapper;
@@ -284,6 +305,7 @@ public class @PlayerInputContoller : IInputActionCollection, IDisposable
         public InputAction @BurstShot => m_Wrapper.m_Player_BurstShot;
         public InputAction @ContinuousShot => m_Wrapper.m_Player_ContinuousShot;
         public InputAction @ActivateStones => m_Wrapper.m_Player_ActivateStones;
+        public InputAction @SelectGun => m_Wrapper.m_Player_SelectGun;
         public InputActionMap Get() { return m_Wrapper.m_Player; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -311,6 +333,9 @@ public class @PlayerInputContoller : IInputActionCollection, IDisposable
                 @ActivateStones.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnActivateStones;
                 @ActivateStones.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnActivateStones;
                 @ActivateStones.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnActivateStones;
+                @SelectGun.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnSelectGun;
+                @SelectGun.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnSelectGun;
+                @SelectGun.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnSelectGun;
             }
             m_Wrapper.m_PlayerActionsCallbackInterface = instance;
             if (instance != null)
@@ -333,6 +358,9 @@ public class @PlayerInputContoller : IInputActionCollection, IDisposable
                 @ActivateStones.started += instance.OnActivateStones;
                 @ActivateStones.performed += instance.OnActivateStones;
                 @ActivateStones.canceled += instance.OnActivateStones;
+                @SelectGun.started += instance.OnSelectGun;
+                @SelectGun.performed += instance.OnSelectGun;
+                @SelectGun.canceled += instance.OnSelectGun;
             }
         }
     }
@@ -354,5 +382,6 @@ public class @PlayerInputContoller : IInputActionCollection, IDisposable
         void OnBurstShot(InputAction.CallbackContext context);
         void OnContinuousShot(InputAction.CallbackContext context);
         void OnActivateStones(InputAction.CallbackContext context);
+        void OnSelectGun(InputAction.CallbackContext context);
     }
 }

@@ -1,4 +1,7 @@
-﻿using UnityEngine;
+﻿using System;
+using System.Runtime.InteropServices.ComTypes;
+using UnityEngine;
+using UnityEngine.UIElements;
 
 public class Shoot : MonoBehaviour
 {
@@ -112,6 +115,31 @@ public class Shoot : MonoBehaviour
 	[Header("Shooting Animation Controls")]
 	Animator animator;
 
+
+	[Header("Gun System Controls")]
+
+	[Tooltip("The id for the gun. Allows player to switch in game")]
+	[SerializeField] int gunId;
+
+	[Tooltip("The gun which the has switched too")]
+	[SerializeField]  Gun newGun;
+
+
+	[Header("UI Controls")]
+
+	[Tooltip("The UI Document contains information about the visual elments shown on screen")]
+	public UIDocument uiDocument;
+
+	[Tooltip("The label gets updated when the players health changes")]
+	Label selectedGunLabel;
+
+	enum Gun
+	{
+		Pistol,
+		Semi,
+		Auto
+	}
+
 	void Awake()
 	{
 		// Add controls to the registry
@@ -126,9 +154,11 @@ public class Shoot : MonoBehaviour
 		// Continuous Shot
 		playerInputController.Player.ContinuousShot.performed += _ => ActivateContinuousShot();
 
+		// Select Gun
+		playerInputController.Player.SelectGun.performed += _ => CycleThroughGuns();
 
 		// Controls Shooting Animation. Release Button To Cancel Shooting Animation
-		playerInputController.Player.SingleShot.canceled += ctx => isShooting = false;
+		playerInputController.Player.SingleShot.canceled += ctx => isShooting = false; // For burst shot this causes the animation to end before 2nd shot is triggered
 
 		// When Conintuous Shot Button Is Released The Shot Is Finished
 		playerInputController.Player.ContinuousShot.canceled += ctx => isContinuouslyShooting = false;
@@ -138,12 +168,15 @@ public class Shoot : MonoBehaviour
 		// Set Number Of Shots Allowed For Each Type Of Shot
 		singleShotsRemaining = singleShotsAllowed;
 		burstShotsRemaining = burstShotsAllowed;
-
 	}
 
 	void OnEnable()
 	{
 		playerInputController.Enable();
+
+		VisualElement rootVisualElement = uiDocument.rootVisualElement;
+		selectedGunLabel = rootVisualElement.Q<Label>("Gun-Select-Label");
+		selectedGunLabel.text = $"Gun: {Gun.Pistol.ToString()}";
 	}
 
 	void OnDisable()
@@ -153,51 +186,74 @@ public class Shoot : MonoBehaviour
 
 	void Update()
 	{
-		// Temp code to show how burst shots works
 		overallGameTime = Time.time;
 
-		// Continously Check Whether Player Is Facing Upwards Or Crouching
 		isFacingUpwards = PlayerController.facingUpwards;
 		isCrouching = PlayerController.crouching;
 
-		// Single Shot
-		if (isSingleShooting && Time.time > nextSingleShotTime && singleShotTime > 0 && isFacingUpwards)
+		if (newGun == Gun.Pistol)
 		{
-			if (singleShotsRemaining > 0)
-			{
-				nextSingleShotTime = Time.time + singleShotTime;
-				SingleShotUpwards();
-				CameraShake(shakeDuration, shakeMagnitude);
-				singleShotsRemaining--;
-			}
-			else
-			{
-				ResetSingleShot();
-			}
+			PistolShot();
 		}
-		else if (isSingleShooting && Time.time > nextSingleShotTime && singleShotTime > 0 && isCrouching)
+
+        if (newGun == Gun.Semi)
+        {
+            SemiAutomaticShot();
+		}
+
+        if (newGun == Gun.Auto)
+        {
+            AutomaticShot();
+		}
+
+        if (isShooting == false)
 		{
-			if (singleShotsRemaining > 0)
-			{
-				
-				nextSingleShotTime = Time.time + singleShotTime;
-				SingleShotCrouching();
-				CameraShake(shakeDuration, shakeMagnitude);
-				singleShotsRemaining--;
-			}
-			else
-			{
-				ResetSingleShot();
-			}
+			animator.SetBool("shooting", isShooting);
 		}
+	}
+
+    // Gun Shooting Methods
+
+    void PistolShot()
+    {
+        // Single Shot
+        if (isSingleShooting && Time.time > nextSingleShotTime && singleShotTime > 0 && isFacingUpwards)
+        {
+            if (singleShotsRemaining > 0)
+            {
+                nextSingleShotTime = Time.time + singleShotTime;
+                SingleShotUpwards();
+                CameraShake(shakeDuration, shakeMagnitude);
+                singleShotsRemaining--;
+            }
+            else
+            {
+                ResetSingleShot();
+            }
+        }
+        else if (isSingleShooting && Time.time > nextSingleShotTime && singleShotTime > 0 && isCrouching)
+        {
+            if (singleShotsRemaining > 0)
+            {
+
+                nextSingleShotTime = Time.time + singleShotTime;
+                SingleShotCrouching();
+                CameraShake(shakeDuration, shakeMagnitude);
+                singleShotsRemaining--;
+            }
+            else
+            {
+                ResetSingleShot();
+            }
+        }
         else if (isSingleShooting && Time.time > nextSingleShotTime && singleShotTime > 0)
         {
             if (singleShotsRemaining > 0)
             {
                 nextSingleShotTime = Time.time + singleShotTime;
                 SingleShot();
-				CameraShake(shakeDuration, shakeMagnitude);
-				singleShotsRemaining--;
+                CameraShake(shakeDuration, shakeMagnitude);
+                singleShotsRemaining--;
             }
             else
             {
@@ -206,7 +262,12 @@ public class Shoot : MonoBehaviour
             }
         }
 
-        // Burst Shot
+		//isSingleShooting = false;
+    }
+
+	void SemiAutomaticShot()
+	{
+		// Burst Shot
 		if (isBurstShooting && Time.time > nextBurstShotTime && burstShotTime > 0 && isFacingUpwards)
 		{
 			if (burstShotsRemaining > 0)
@@ -250,7 +311,10 @@ public class Shoot : MonoBehaviour
 				ResetBurstShot();
 			}
 		}
+	}
 
+	void AutomaticShot()
+	{
 		// Continuous Shot
 		if (isContinuouslyShooting && Time.time > nextContinuousShotTime && continousShotTime > 0 && isFacingUpwards)
 		{
@@ -270,18 +334,15 @@ public class Shoot : MonoBehaviour
 			ContinuousShot();
 			CameraShake(shakeDuration, shakeMagnitude);
 		}
-
-		if (isShooting == false)
-		{
-			animator.SetBool("shooting", isShooting);
-		}
-
 	}
 
 	// Single Shot Methods
 	void ActivateSingleShot()
 	{
-		isSingleShooting = true;
+		if (newGun == Gun.Pistol)
+		{
+			isSingleShooting = true;
+		}
 	}
 
 	void SingleShot()
@@ -309,7 +370,10 @@ public class Shoot : MonoBehaviour
 	// Burst Shot Methods
 	void AcivateBurstShot()
 	{
-		isBurstShooting = true;
+		if (newGun == Gun.Semi)
+		{
+			isBurstShooting = true;
+		}
 	}
 
 	void BurstShot()
@@ -377,4 +441,38 @@ public class Shoot : MonoBehaviour
 	{
 		StartCoroutine(cameraShaker.Shake(shakeDuration, shakeMagnitude));
 	}
+
+	// Gun System Methods
+	void CycleThroughGuns()
+	{
+		if (gunId == 2)
+		{
+			gunId = 0;
+		}
+		else 
+		{
+			gunId++;
+		}
+
+		SwitchGun(gunId);
+	}
+
+    void SwitchGun(int gunId)
+    {
+		switch (gunId)
+		{
+			case 0:
+				newGun = Gun.Pistol;
+				selectedGunLabel.text = $"Gun: {newGun.ToString()}";
+				break;
+			case 1:
+				newGun = Gun.Semi;
+				selectedGunLabel.text = $"Gun: {newGun.ToString()}";
+				break;
+			case 2:
+				newGun = Gun.Auto;
+				selectedGunLabel.text = $"Gun: {newGun.ToString()}";
+				break;
+		}
+    }
 }
