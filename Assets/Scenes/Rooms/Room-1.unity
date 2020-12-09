@@ -280,7 +280,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8524262211460854812, guid: 9b05630c877862038803a150d8a8c198, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8524262211460854819, guid: 9b05630c877862038803a150d8a8c198, type: 3}
       propertyPath: m_LocalPosition.x
@@ -385,7 +385,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2992866925174896253, guid: bff2abc061267f447bc696c143d625cf, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: bff2abc061267f447bc696c143d625cf, type: 3}
@@ -548,6 +548,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rooms: []
+  levelGeneratorSetupDebuggingEnabled: 0
+  gridGeneratorDebuggingEnabled: 1
+  removingUnwantedRoomNameElementsDebuggingEnabled: 0
+  mapCurrentRoomElementsToAdjoiningRoomElementsDebuggingEnabled: 1
+  mapRoomElementsToAdjoiningRoomGridPositionDebuggingEnabled: 0
+  debuggingEnabled: 0
+  lowLevelDebuggingEnabled: 0
 --- !u!4 &1675496691
 Transform:
   m_ObjectHideFlags: 0
@@ -1249,7 +1256,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2582575046397020714, guid: 935169214f71d8f4d906544659bc16d6, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2622590996488686663, guid: 935169214f71d8f4d906544659bc16d6, type: 3}
       propertyPath: m_Layer
@@ -2831,7 +2838,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2509273282492195977, guid: 0df180ea4a7df4a46aa57769433b237e, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2543186704912984971, guid: 0df180ea4a7df4a46aa57769433b237e, type: 3}
       propertyPath: m_Layer
@@ -3930,7 +3937,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8318774048886348477, guid: af41edd2494cb8245a8a4069db079600, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8318774048886348479, guid: af41edd2494cb8245a8a4069db079600, type: 3}
       propertyPath: currentHealth
@@ -4195,7 +4202,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7338426128389199764, guid: b0f8993d89042e34eb7ef9e363039be1, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7338426128389199765, guid: b0f8993d89042e34eb7ef9e363039be1, type: 3}
       propertyPath: m_LocalPosition.x
@@ -4256,7 +4263,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7548271372211543137, guid: cac8b65e4162d6b4c993fee2e85836cf, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7548271372211543138, guid: cac8b65e4162d6b4c993fee2e85836cf, type: 3}
       propertyPath: m_LocalPosition.x

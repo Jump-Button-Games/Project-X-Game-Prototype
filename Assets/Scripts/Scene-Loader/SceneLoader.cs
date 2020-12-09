@@ -9,7 +9,7 @@ public class SceneLoader : MonoBehaviour
 
     void Start() {
         scene = SceneManager.GetActiveScene();
-        Debug.Log("Scene Name: " + getSceneName());
+        //Debug.Log("Scene Name: " + getSceneName());
     }
 
      void OnCollisionEnter2D(Collision2D col)
