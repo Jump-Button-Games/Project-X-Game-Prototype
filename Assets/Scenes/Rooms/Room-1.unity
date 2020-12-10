@@ -550,7 +550,7 @@ MonoBehaviour:
   levelGeneratorSetupDebuggingEnabled: 0
   gridGeneratorDebuggingEnabled: 0
   removingUnwantedRoomNameElementsDebuggingEnabled: 0
-  mapCurrentRoomElementsToAdjoiningRoomElementsDebuggingEnabled: 1
+  mapCurrentRoomElementsToAdjoiningRoomElementsDebuggingEnabled: 0
   mapRoomElementsToAdjoiningRoomGridPositionDebuggingEnabled: 0
   debuggingEnabled: 0
   lowLevelDebuggingEnabled: 0
