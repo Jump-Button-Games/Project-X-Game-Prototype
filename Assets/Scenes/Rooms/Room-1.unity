@@ -547,9 +547,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5724fe149e9a1de41a5727264e3e39d2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rooms: []
   levelGeneratorSetupDebuggingEnabled: 0
-  gridGeneratorDebuggingEnabled: 1
+  gridGeneratorDebuggingEnabled: 0
   removingUnwantedRoomNameElementsDebuggingEnabled: 0
   mapCurrentRoomElementsToAdjoiningRoomElementsDebuggingEnabled: 1
   mapRoomElementsToAdjoiningRoomGridPositionDebuggingEnabled: 0
