@@ -5,97 +5,65 @@ using UnityEngine;
 
 public class LevelGenerator : MonoBehaviour
 {
-    // Room Elements
-    readonly List<string> roomOpenExitElements = new List<string> { "n", "no", "nne", "ne", "ene", "e", "eo", "ese", "se", "sse", "s", "so", "ssw", "sw", "wsw", "w", "wo", "wnw", "nw", "nnw" };
-    readonly List<string> adjoiningRoomOpenExitElements = new List<string> { "s", "so", "sse", "se", "wnw", "w", "wo", "wsw", "ne", "nne", "n", "no", "nnw", "nw", "ese", "e", "eo", "ene", "sw", "ssw" };
-    readonly List<string> roomClosedExitElements = new List<string> { "nc", "ec", "sc", "wc" };
-
-    // Open Exit Elements Mapper
-    Dictionary<string, string> roomOpenExitsElementsMapper = new Dictionary<string, string>();
-
-    // Required Room Elements For Connecting Adjoining Room
+    // Grid Generation Variables
+    Dictionary<string, string> openElementsMapper;
+    Rooms rooms;
+    RoomElements roomElements;
     List<string> requiredRoomElementsForConnectingAdjoiningRoom = new List<string>();
-
-    // Debugging Purposes
-    Dictionary<Vector2, string> gridPositionsWithCorrespondingRoomNames = new Dictionary<Vector2, string>();
-
-    // Corner Rooms
-    readonly List<string> nwCornerRooms = new List<string> { "cr-nc-eo-sc-wc" };
-    readonly List<string> neCornerRooms = new List<string> { "cr-nc-ec-sc-wo" };
-    readonly List<string> swCornerRooms = new List<string> { "cr-nc-eo-sc-wc" };
-    readonly List<string> seCornerRooms = new List<string> { "cr-nc-ec-sc-wo" };
-
-    // Start and End Rooms
-    readonly List<string> startRooms = new List<string> { "s-1" };
-    readonly List<string> endRooms = new List<string> { "e-1" };
-
-    // Link Room Codes
-    readonly List<string> linkRooms = new List<string> { "lk-nc-eo-sc-wo", "lk-n-eo-s-wo", "lk-nc-eo-sc-wc", "lk-n-eo-sc-wc", "lk-nc-eo-s-wo", "lk-nc-ec-s-wo", "lk-nc-ec-sc-wo" };
-
-    // Contains The World Position and Room Name To Place In That World Position
-    Dictionary<Vector2, string> worldPositionAndRoomNameForLoadingLevel = new Dictionary<Vector2, string>();
 
     // Stores the required room elements for upcoming grid positions
     Dictionary<Vector2, List<string>> requiredRoomElementsForGridPositions = new Dictionary<Vector2, List<string>>();
 
-    // Involved in determining the world positions of each room
-    const float worldStartingPointOnYAxis = -0.5f; // The NW corner room will have the coordinate (0, -0.5f)
-    const float roomLengthOnXAxis = 16f;
-    const float roomLengthOnYAxis = 9f;
+    // Area Loading Variables
+    Area area;
 
-    // Determines the size of the grid
-    const int gridLength = 5;
+    // Grid Configuration
+    GridConfiguration gridConfiguration;
 
     // Variables For Rules
     Vector2[] startAndEndRoomGridPositions = new Vector2[2];
     Vector2[] cornerRoomGridPositions = new Vector2[4];
 
-    Vector2 gridStartingPosition;
     string currentRoom;
 
-    // Variables For Debugging
-    public bool levelGeneratorSetupDebuggingEnabled = false;
-    public bool gridGeneratorDebuggingEnabled = false;
-    public bool removingUnwantedRoomNameElementsDebuggingEnabled = false;
-    public bool mapCurrentRoomElementsToAdjoiningRoomElementsDebuggingEnabled = false;
-    public bool mapRoomElementsToAdjoiningRoomGridPositionDebuggingEnabled = false;
-    public bool debuggingEnabled = false;
-    public bool lowLevelDebuggingEnabled = false; 
+    // Debugging Purposes
+    Dictionary<Vector2, string> gridPositionsWithCorrespondingRoomNames = new Dictionary<Vector2, string>();
 
-    // Used To Break Room Names Into Indiviual Strings
-    readonly string[] roomNameSpearator = { "-" };
-
+    // Loading
     // Store prefabs for loading rooms
-    readonly GameObject[] rooms;
+    readonly GameObject[] roomsGO;
 
     void Awake()
     {
-        PrintLevelGeneratorSetup();
+        area = new Area();
+        rooms = new Rooms();
+        roomElements = new RoomElements();
+        
+        gridConfiguration = new GridConfiguration();
 
-        populateRoomOpenExitsElementsMapper();
+        populateOpenElementsMapper(roomElements.openElements, roomElements.adjoiningOpenElements);
 
         // Rules Setup
         StartAndEndRoomGridPositionRule();
         CornerRoomGridPositionRule();
-
-        // Initialisation
-        gridStartingPosition = new Vector2(0, 0);
-
-        PrintLevelGeneratorSetupCompleted();
     }
+
+    // CODE CLEANED UP A GOOD BIT
+    // NORTH SOUTH EXITS WORKING
+    // ISSUE AGAIN WITH THE WEST AND EAST OF GRID NOT HAVING THE CLOSED EXITS THEY REQUIRE
 
     void Start()
     {
-        PrintGridGenerationStarting();
-
-        for (int row = 0; row < gridLength; row++)
+        for (int row = 0; row < GridConfiguration.size; row++)
         {
-            for (int column = 0; column < gridLength; column++)
+            for (int column = 0; column < GridConfiguration.size; column++)
             {
                 Vector2 currentGridPosition = new Vector2(row, column);
-                Vector2 worldPosition = CalculateWorldPositionBasedOnGridPosition(currentGridPosition);
+                Vector2 worldPoint = CalculateWorldPositionBasedOnGridPosition(currentGridPosition);
 
                 SelectRoomForCurrentGridPosition(currentGridPosition);
+
+                Debug.Log("Current Grid Position: " + currentGridPosition + "   |   Current Room Selected: " + currentRoom);
 
                 CollectRequiredRoomElementsForAdjoiningRooms(currentGridPosition, currentRoom);
 
@@ -105,12 +73,11 @@ public class LevelGenerator : MonoBehaviour
                 // Debugging Purposes
                 gridPositionsWithCorrespondingRoomNames.Add(currentGridPosition, currentRoom);
 
-                SaveRoomDetailsForLoading(currentRoom, worldPosition);
+                SaveRoomDetailsForLoading(worldPoint, currentRoom);
             }
         }
 
-        // Debugging Purposes
-        PrintContentsOfVector2AndStringDictionary(gridPositionsWithCorrespondingRoomNames);
+        // PrintContentsOfVector2AndStringDictionary(gridPositionsWithCorrespondingRoomNames);
 
         // WORKING CODE: THIS MIGHT BE ABLE TO BE PUT INTO A SINGLE METHOD TO CLEAN IT UP
 
@@ -142,29 +109,27 @@ public class LevelGenerator : MonoBehaviour
      */
 
     // Step 1a: Initialisation
-    void populateRoomOpenExitsElementsMapper()
+    void populateOpenElementsMapper(List<string> openElements, List<string> adjoiningOpenElements)
     {
-        for (int i = 0; i < roomOpenExitElements.Count; i++)
-        {
-            roomOpenExitsElementsMapper.Add(roomOpenExitElements[i], adjoiningRoomOpenExitElements[i]);
-        }
+        openElementsMapper = new Dictionary<string, string>();
 
-        PrintExitMapperCompletion();
+        for (int i = 0; i < openElements.Count; i++)
+        {
+            openElementsMapper.Add(openElements[i], adjoiningOpenElements[i]);
+        }
     }
 
     // Step 1b: Rule Setup
     void StartAndEndRoomGridPositionRule()
     {
-        int randomStartPosition = UnityEngine.Random.Range(1, (gridLength - 1));
+        int randomStartPosition = UnityEngine.Random.Range(1, (GridConfiguration.size - 1));
         Vector2 start = new Vector2(randomStartPosition, 0);
 
-        int randomEndPosition = UnityEngine.Random.Range(1, (gridLength - 1));
-        Vector2 end = new Vector2(randomEndPosition, (gridLength - 1));
+        int randomEndPosition = UnityEngine.Random.Range(1, (GridConfiguration.size - 1));
+        Vector2 end = new Vector2(randomEndPosition, (GridConfiguration.size - 1));
 
         startAndEndRoomGridPositions[0] = start;
         startAndEndRoomGridPositions[1] = end;
-
-        PrintStartAndEndRoomsGeneratedGridPositions(start, end);
     }
 
     void CornerRoomGridPositionRule()
@@ -175,15 +140,13 @@ public class LevelGenerator : MonoBehaviour
         cornerRoomGridPositions[0] = new Vector2(0, 0);
 
         // ne
-        cornerRoomGridPositions[1] = new Vector2(0, gridLength - 1);
+        cornerRoomGridPositions[1] = new Vector2(0, GridConfiguration.size - 1);
 
         // sw
-        cornerRoomGridPositions[2] = new Vector2(gridLength - 1, 0);
+        cornerRoomGridPositions[2] = new Vector2(GridConfiguration.size - 1, 0);
 
         // se
-        cornerRoomGridPositions[3] = new Vector2(gridLength - 1, gridLength - 1);
-
-        PrintCornerRoomsGeneratedGridPositions(cornerRoomGridPositions[0], cornerRoomGridPositions[1], cornerRoomGridPositions[2], cornerRoomGridPositions[3]);
+        cornerRoomGridPositions[3] = new Vector2(GridConfiguration.size - 1, GridConfiguration.size - 1);
     }
 
     /*
@@ -193,8 +156,8 @@ public class LevelGenerator : MonoBehaviour
     // Step 2a: Calculate World Positions For Rooms
     Vector2 CalculateWorldPositionBasedOnGridPosition(Vector2 currentGridPosition)
     {
-        float wolrdPositionX = currentGridPosition.y * roomLengthOnXAxis;
-        float worldPositionY = worldStartingPointOnYAxis - (roomLengthOnYAxis * currentGridPosition.x);
+        float wolrdPositionX = currentGridPosition.y * Area.roomLengthOnXAxis;
+        float worldPositionY = Area.worldStartingPointOnYAxis - (Area.roomLengthOnYAxis * currentGridPosition.x);
 
         return new Vector2(wolrdPositionX, worldPositionY);
     }
@@ -202,7 +165,7 @@ public class LevelGenerator : MonoBehaviour
     // Step 2b: Select a room for the current grid position
     void SelectRoomForCurrentGridPosition(Vector2 currentGridPosition)
     {
-        if (currentGridPosition == gridStartingPosition)
+        if (currentGridPosition == gridConfiguration.startingPosition)
         {
             currentRoom = FirstRoomSelector();
         }
@@ -210,13 +173,11 @@ public class LevelGenerator : MonoBehaviour
         {
             currentRoom = AllOtherRoomsSelector(currentGridPosition);
         }
-
-        PrintCurrentRoomAndGridPositionInformation(currentGridPosition, currentRoom);
     }
 
     string FirstRoomSelector()
     {
-        return RandomRoomSelection(nwCornerRooms);
+        return RandomRoomSelection(rooms.nwCornerRooms);
     }
 
     // TODO: THIS ENTIRE METHOD NEEDS TO BE LOOK AT MORE CLOSELY AND CLEANED UP
@@ -225,19 +186,19 @@ public class LevelGenerator : MonoBehaviour
         // North-East Corner Room
         if (cornerRoomGridPositions[1] == currentGridPosition)
         {
-            return RandomRoomSelection(neCornerRooms);
+            return RandomRoomSelection(rooms.neCornerRooms);
         }
 
         // South-West Corner Room
         if (cornerRoomGridPositions[2] == currentGridPosition)
         {
-            return RandomRoomSelection(swCornerRooms);
+            return RandomRoomSelection(rooms.swCornerRooms);
         }
 
         // South-East Corner Room
         if (cornerRoomGridPositions[3] == currentGridPosition)
         {
-            return RandomRoomSelection(seCornerRooms);
+            return RandomRoomSelection(rooms.seCornerRooms);
         }
 
         List<string> roomsWhichMeetTheExitRequirements = new List<string>();
@@ -262,19 +223,23 @@ public class LevelGenerator : MonoBehaviour
         if (exitsRequiredForCurrentGridPosition == null)
         {
             // If NULL does that mean any room can be selected?
-            int tempRandomRoom = UnityEngine.Random.Range(0, linkRooms.Count);
-            return linkRooms[tempRandomRoom];
+            int tempRandomRoom = UnityEngine.Random.Range(0, rooms.linkRooms.Count);
+            return rooms.linkRooms[tempRandomRoom];
         }
         else 
         {
             // Working on LinkedRooms for now but it will need to be able to handle any type of room it is provided
-            foreach (string roomName in linkRooms)
+            foreach (string roomName in rooms.linkRooms)
             {
                 bool doesRoomMeetExitRequirements = false;
 
                 // loop though exitsRequiredForCurrentGridPosition and compare each to the room name
                 for (int i = 0; i < exitsRequiredForCurrentGridPosition.Count; i++)
                 {
+
+                    // Changed single character elements to be double character elements 
+                    // Should provide better visibility for the Contains method
+                    // E.G n is now nm
                     if (roomName.Contains(exitsRequiredForCurrentGridPosition[i]))
                     {
                         doesRoomMeetExitRequirements = true;
@@ -295,29 +260,22 @@ public class LevelGenerator : MonoBehaviour
             }
         }
 
-        //PrintSuitableRoomsForSelection(roomsWhichMeetTheExitRequirements, exitsRequiredForCurrentGridPosition, currentGridPosition);
-
         return SelectRandomRoomWhichMeetsElementsRequirements(roomsWhichMeetTheExitRequirements, currentGridPosition);
     }
 
     string RandomRoomSelection(List<string> listOfRooms)
     {
         int selectRandomNwCornerRoom = UnityEngine.Random.Range(0, listOfRooms.Count);
-        PrintInitialRoomSelectedToStartLevelGenerator(selectRandomNwCornerRoom);
         return listOfRooms[selectRandomNwCornerRoom];
     }
 
     // TODO: AVOID HARD CODING THE DEFAULT ROOM
     List<string> CreateDefaultRoomElementsForCurrentGridPosition(Vector2 currentGridPosition)
     {
-
-        //Debug.Log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Creating Default Room For Grid Position: " + currentGridPosition);
-
         List<string> requiredRoomElements = new List<string>();
 
         if (currentGridPosition.y == 0) // First Column
         {
-            //Debug.Log("Default Room For First Column");
             // Enter Into The Grid at the current Grid Position A Default Requirement Of A wc
             requiredRoomElements.Add("wc");
             requiredRoomElements.Add("nc");
@@ -326,9 +284,8 @@ public class LevelGenerator : MonoBehaviour
             requiredRoomElementsForGridPositions.Add(currentGridPosition, requiredRoomElements);
         }
 
-        if (currentGridPosition.y > 0 && currentGridPosition.y < (gridLength - 1)) // In-between end columns
+        if (currentGridPosition.y > 0 && currentGridPosition.y < (GridConfiguration.size - 1)) // In-between end columns
         {
-            //Debug.Log("Default Room For In-between Column");
             requiredRoomElements.Add("wo");
             requiredRoomElements.Add("nc");
             requiredRoomElements.Add("sc");
@@ -336,9 +293,8 @@ public class LevelGenerator : MonoBehaviour
             requiredRoomElementsForGridPositions.Add(currentGridPosition, requiredRoomElements);
         }
 
-        if (currentGridPosition.y == (gridLength - 1)) // In-between end columns
+        if (currentGridPosition.y == (GridConfiguration.size - 1)) // In-between end columns
         {
-            //Debug.Log("Default Room For Last Column");
             requiredRoomElements.Add("wo");
             requiredRoomElements.Add("nc");
             requiredRoomElements.Add("sc");
@@ -346,15 +302,13 @@ public class LevelGenerator : MonoBehaviour
             requiredRoomElementsForGridPositions.Add(currentGridPosition, requiredRoomElements);
         }
 
-        //PrintDeafultRoomCreated(currentGridPosition, requiredRoomElements);
-
         return requiredRoomElements;
     }
 
     string SelectRandomRoomWhichMeetsElementsRequirements(List<string> roomsWhichMeetTheExitRequirements, Vector2 currentGridPosition)
     {
         int selectRandomRoom = UnityEngine.Random.Range(0, roomsWhichMeetTheExitRequirements.Count);
-        PrintRoomSelectedAtGridPosition(roomsWhichMeetTheExitRequirements[selectRandomRoom], currentGridPosition);
+
         return roomsWhichMeetTheExitRequirements[selectRandomRoom];
     }
 
@@ -365,11 +319,9 @@ public class LevelGenerator : MonoBehaviour
         // New Iteration Of Loop Requires Empty List
         ClearRequiredRoomElementsForConnectingAdjoiningRoomList();
     
-        string[] allSeparatedRoomElements = currentRoom.Split(roomNameSpearator, StringSplitOptions.RemoveEmptyEntries);
+        string[] separatedElements = currentRoom.Split(roomElements.separator, StringSplitOptions.RemoveEmptyEntries);
 
-        List<string> roomElementsAfterFiltering = RemoveUnneededRoomElementsForAdjoiningRoom(currentGridPosition, allSeparatedRoomElements);
-
-        PrintRoomElementsRequiredForAdjoiningRoomsAfterFiltering(currentGridPosition, roomElementsAfterFiltering);
+        List<string> roomElementsAfterFiltering = filterUnneededElements(currentGridPosition, separatedElements);
 
         DetermineRequiredAdjoiningRoomElements(roomElementsAfterFiltering);
     }
@@ -379,126 +331,126 @@ public class LevelGenerator : MonoBehaviour
         requiredRoomElementsForConnectingAdjoiningRoom.Clear();
     }
 
-    List<string> RemoveUnneededRoomElementsForAdjoiningRoom(Vector2 currentGridPosition, string[] allSeparatedRoomElements)
+    // This method is the first step of filtering
+    // It's removing / keeping elements essential to building the outer grid correctly
+    /*List<string> RemoveUnneededRoomElementsForAdjoiningRoom(Vector2 currentGridPosition, string[] separatedElements)
     {
-        List<string> listOfAllRoomNameElements = allSeparatedRoomElements.ToList();
+        List<string> separatedElementsList = separatedElements.ToList();
 
-        for (int i = 0; i < listOfAllRoomNameElements.Count; i++)
+        RemoveRoomTypeElement(separatedElementsList);
+
+        // Loop through list of Elements
+        // Should Always Be 4
+        for (int i = 0; i < separatedElementsList.Count; i++)
         {
-            RemoveRoomTypeElement(i, listOfAllRoomNameElements);
+            Debug.Log("Interation Count: " + (i + 1) + "    |   List Count: " + separatedElementsList.Count);
 
+            string elements = "";
+            foreach (string element in separatedElementsList)
+            {
+                elements += element + " ";
+            }
+
+            Debug.Log("Elements Still In separatedElementsList: " + elements);
             // Rules For Building The Grid With Outer Walls
 
-            RemoveNorthClosedElementUnlessInTheTopRowOfGrid(i, currentGridPosition.x, listOfAllRoomNameElements);
+            RemoveNorthClosedElementUnlessInTheTopRowOfGrid(i, currentGridPosition.x, separatedElementsList);
 
-            RemoveWestClosedElementUnlessInTheFirstColumnOfGrid(i, currentGridPosition.y, listOfAllRoomNameElements);
+            RemoveWestClosedElementUnlessInTheFirstColumnOfGrid(i, currentGridPosition.y, separatedElementsList);
 
-            RemoveSouthClosedElementUnlessInTheLastRowOfGrid(i, currentGridPosition.x, listOfAllRoomNameElements);
+            // TESTING THIS CODE BEING COMMENTED OUT
+            //RemoveSouthClosedElementUnlessInTheLastRowOfGrid(i, currentGridPosition.x, listOfAllRoomNameElements);
 
-            RemoveEastClosedElementUnlessInTheLastColumnOfGrid(i, currentGridPosition.y, listOfAllRoomNameElements);
+            RemoveEastClosedElementUnlessInTheLastColumnOfGrid(i, currentGridPosition.y, separatedElementsList);
         }
 
         // Advanced Rules For Removing Exits Which Are Not Required
 
-        RemoveEastExitRequirementExceptForLastColumn(currentGridPosition.y, listOfAllRoomNameElements);
+        RemoveEastExitRequirementExceptForLastColumn(currentGridPosition.y, separatedElementsList);
 
-        return listOfAllRoomNameElements;
+        return separatedElementsList;
+    }*/
+
+    List<string> filterUnneededElements(Vector2 currentGridPosition, string[] separatedElements)
+    {
+        List<string> separatedElementsList = separatedElements.ToList();
+
+        RemoveRoomTypeElement(separatedElementsList);
+
+        // Keep Elements Required For The Outside Of Grid
+        RemoveNorthClosedElementUnlessInTheTopRowOfGrid(currentGridPosition.x, separatedElementsList);
+        RemoveWestClosedElementUnlessInTheFirstColumnOfGrid(currentGridPosition.y, separatedElementsList);
+        RemoveEastClosedElementUnlessInTheLastColumnOfGrid(currentGridPosition.y, separatedElementsList);
+
+        // Advanced Rules For Removing Exits Which Are Not Required
+
+        RemoveEastExitRequirementExceptForLastColumn(currentGridPosition.y, separatedElementsList);
+
+        return separatedElementsList;
     }
 
-    void RemoveRoomTypeElement(int i, List<string> listOfAllRoomNameElements)
+    void RemoveRoomTypeElement(List<string> separatedElementsList)
     {
-        if (i == 0)
+        separatedElementsList.Remove(separatedElementsList[0]);
+    }
+
+    void RemoveNorthClosedElementUnlessInTheTopRowOfGrid(float currentGridRow, List<string> separatedElementsList)
+    {
+        if (separatedElementsList.Contains(RoomElements.nc) && currentGridRow != 0)
         {
-            PrintRemovingRoomTypeElement(listOfAllRoomNameElements[i]);
-            listOfAllRoomNameElements.Remove(listOfAllRoomNameElements[i]);
+            separatedElementsList.Remove(RoomElements.nc);
         }
     }
 
-    void RemoveNorthClosedElementUnlessInTheTopRowOfGrid(int i, float currentGridRow, List<string> listOfAllRoomNameElements)
+    void RemoveWestClosedElementUnlessInTheFirstColumnOfGrid(float currentGridColumn, List<string> separatedElementsList)
     {
-        if (currentGridRow != 0) // If Not In Top Row Of Grid
+        if (separatedElementsList.Contains(RoomElements.wc) && currentGridColumn != 0)
         {
-            if (listOfAllRoomNameElements[i].Equals("nc")) // If Room Has A Closed North Exit Then Remove It (Not Required)
-            {
-                PrintRemovingRoomExitElement(listOfAllRoomNameElements[i]);
-                listOfAllRoomNameElements.Remove(listOfAllRoomNameElements[i]);
-            }
+            separatedElementsList.Remove(RoomElements.wc);
         }
     }
 
-    void RemoveWestClosedElementUnlessInTheFirstColumnOfGrid(int i, float currentGridColumn, List<string> listOfAllRoomNameElements)
-    {
-        if (currentGridColumn != 0) // If Not In The First Column Of Grid
-        {
-            if (listOfAllRoomNameElements[i].Equals("wc")) // If Room Has A Closed West Exit Then Remove It (Not Required)
-            {
-                PrintRemovingRoomExitElement(listOfAllRoomNameElements[i]);
-                listOfAllRoomNameElements.Remove(listOfAllRoomNameElements[i]);
-            }
-        }
-    }
 
-    void RemoveSouthClosedElementUnlessInTheLastRowOfGrid(int i, float currentGridRow, List<string> listOfAllRoomNameElements)
+    // Algorithm might need to keep all sc's which are picked as this means an nc will be required
+    /*void RemoveSouthClosedElementUnlessInTheLastRowOfGrid(int i, float currentGridRow, List<string> listOfAllRoomNameElements)
     {
-        if (currentGridRow != (gridLength - 1)) // If Not In The Last Row Of Grid 
+        if (currentGridRow != (GridConfiguration.size - 1)) // If Not In The Last Row Of Grid 
         {
             if (listOfAllRoomNameElements[i].Contains("sc")) // If Room Has A Closed South Exit Then Remove It (Not Required)
             {
-                PrintRemovingRoomExitElement(listOfAllRoomNameElements[i]);
-                listOfAllRoomNameElements.Remove(listOfAllRoomNameElements[i]);
-            }  
-        }
-    }
-
-    void RemoveEastClosedElementUnlessInTheLastColumnOfGrid(int i, float currentGridColumn, List<string>  listOfAllRoomNameElements)
-    {
-        if (currentGridColumn != (gridLength - 1))
-        {
-            if (listOfAllRoomNameElements[i].Contains("ec")) // If Room Has A Closed East Exit Then Remove It (Not Required)
-            {
-                PrintRemovingRoomExitElement(listOfAllRoomNameElements[i]);
                 listOfAllRoomNameElements.Remove(listOfAllRoomNameElements[i]);
             }
         }
+    }*/
+
+    void RemoveEastClosedElementUnlessInTheLastColumnOfGrid(float currentGridColumn, List<string> separatedElementsList)
+    {
+        if (separatedElementsList.Contains(RoomElements.ec) && currentGridColumn != (GridConfiguration.size - 1))
+        {
+            separatedElementsList.Remove(RoomElements.ec);
+        }
     }
 
-    void RemoveEastExitRequirementExceptForLastColumn(float currentGridColumn, List<string> listOfAllRoomNameElements)
+    void RemoveEastExitRequirementExceptForLastColumn(float currentGridColumn, List<string> separatedElementsList)
     {
-        if (currentGridColumn != (gridLength - 1))
+        if (separatedElementsList.Contains(RoomElements.wo) && separatedElementsList.Count >= 2 && currentGridColumn != (GridConfiguration.size - 1)) // Possible this needs to be (- 2) not (- 1)
         {
-            if (listOfAllRoomNameElements.Count >= 2) // If The Room Contains 2 Or More Exits E.G "lk-nc-eo-sc-wo"
-            {
-                for (int i = 0; i < listOfAllRoomNameElements.Count; i++)
-                {
-                    // Remove West Exits As They Will Trigger The Requirement Of An East Exit
-                    // As Of 8/12/2020
-                    // East Exits Are Not Required For Any Room Except For Rooms In The Last Column
-                    if (listOfAllRoomNameElements[i].Contains("wo"))
-                    {
-                        PrintRemovingRoomExitElement(listOfAllRoomNameElements[i]);
-                        listOfAllRoomNameElements.Remove(listOfAllRoomNameElements[i]);
-                    }
-                }
-            }
+            separatedElementsList.Remove(RoomElements.wo);
         }
     }
 
     void DetermineRequiredAdjoiningRoomElements(List<string> roomElementsAfterFiltering)
     {
-        PrintMapCurrentExitsToAdjoiningExits();
-
         for (int i = 0; i < roomElementsAfterFiltering.Count; i++)
         {
             if (roomElementsAfterFiltering[i].Equals("nc") || roomElementsAfterFiltering[i].Equals("ec") || roomElementsAfterFiltering[i].Equals("sc") || roomElementsAfterFiltering[i].Equals("wc"))
             {
-                PrintRoomElementAcceptedIntoRequiredElementsList(roomElementsAfterFiltering[i]);
                 requiredRoomElementsForConnectingAdjoiningRoom.Add(roomElementsAfterFiltering[i]);
             }
 
             if (!roomElementsAfterFiltering[i].Equals("nc") && !roomElementsAfterFiltering[i].Equals("wc") && !roomElementsAfterFiltering[i].Equals("ec") && !roomElementsAfterFiltering[i].Equals("sc"))
             {
-                PrintRoomElementWithTheMappedElement(roomElementsAfterFiltering[i], roomOpenExitsElementsMapper[roomElementsAfterFiltering[i]]);
-                requiredRoomElementsForConnectingAdjoiningRoom.Add(roomOpenExitsElementsMapper[roomElementsAfterFiltering[i]]);
+                requiredRoomElementsForConnectingAdjoiningRoom.Add(openElementsMapper[roomElementsAfterFiltering[i]]);
             }            
         }
      }
@@ -508,32 +460,36 @@ public class LevelGenerator : MonoBehaviour
     // Then iterate within the method, can stop unncessary looping
     void MapRequiredElementsForAjoiningRoomsToCorrectGridPositions(Vector2 currentGridPosition, List<string> roomElementsRequiredForAdjoiningRoom)
      {
-        PrintMappingRequiredElementsForAdjoiningRooms();
-
         for (int i = 0; i < roomElementsRequiredForAdjoiningRoom.Count; i++)
         {
             // Reset To Current Grid Position On Each Iteration
             Vector2 calculatedGridPosition = currentGridPosition;
 
             // Grid Position Movement
-            Vector2 gridPositionForNorthExit = new Vector2(1, 0);
-            Vector2 gridPositionForWestExit = new Vector2(0, 1);
+            Vector2 gridPositionForNorthElements = new Vector2(1, 0);
+            Vector2 gridPositionForWestElements = new Vector2(0, 1);
 
             // Possible if statement could reduce how often this code is checked
             // E.G Only is i == 0
             // CAN RENAME LIKE EAST METHOD WAS
-            MapTopRowRoomsToHaveNorthClosedElement(i, calculatedGridPosition, gridPositionForWestExit, roomElementsRequiredForAdjoiningRoom);
 
-            if (calculatedGridPosition.y == (gridLength - 2))
+            // Can futher add to this method for room which have sc the room below must have an nc
+            MapTopRowRoomsToHaveNorthClosedElement(i, calculatedGridPosition, gridPositionForWestElements, roomElementsRequiredForAdjoiningRoom);
+
+            if (calculatedGridPosition.y == (GridConfiguration.size - 2))
             {
-                MapEastClosedElementToGridPositionsWhichRequiresIt(i, calculatedGridPosition, gridPositionForWestExit, roomElementsRequiredForAdjoiningRoom);
+                MapEastClosedElementToGridPositionsWhichRequiresIt(i, calculatedGridPosition, gridPositionForWestElements, roomElementsRequiredForAdjoiningRoom);
             }
 
             // CAN RENAME LIKE EAST METHOD WAS
-            MapBottomRowRoomsToHaveSouthClosedElement(i, calculatedGridPosition, gridPositionForWestExit, roomElementsRequiredForAdjoiningRoom);
+            MapBottomRowRoomsToHaveSouthClosedElement(i, calculatedGridPosition, gridPositionForWestElements, roomElementsRequiredForAdjoiningRoom);
 
             // CAN RENAME LIKE EAST METHOD WAS
-            MapRoomsWhichRequireWestElementToGridPosition(i, calculatedGridPosition, gridPositionForWestExit, roomElementsRequiredForAdjoiningRoom);
+            MapRoomsWhichRequireWestElementToGridPosition(i, calculatedGridPosition, gridPositionForWestElements, roomElementsRequiredForAdjoiningRoom);
+
+            MapRoomsWhichRequireNorthClosedElementsToGridPosition(i, calculatedGridPosition, gridPositionForNorthElements, roomElementsRequiredForAdjoiningRoom);
+
+            MapRoomsWhichRequireNorthExitsToGridPosition(i, calculatedGridPosition, gridPositionForNorthElements, roomElementsRequiredForAdjoiningRoom);
         }
     }
 
@@ -545,7 +501,6 @@ public class LevelGenerator : MonoBehaviour
             {
                 // The room to the right must also have a closed north exit 'nc'
                 calculatedGridPosition += gridPositionForWestExit;
-                //PrintExitToGridPositionMapping(roomElementsRequiredForAdjoiningRoom[i], calculatedGridPosition, "MapTopRowRoomsToHaveNorthClosedElement");
 
                 if (!requiredRoomElementsForGridPositions.ContainsKey(calculatedGridPosition))
                 {
@@ -591,13 +546,12 @@ public class LevelGenerator : MonoBehaviour
 
     void MapBottomRowRoomsToHaveSouthClosedElement(int i, Vector2 calculatedGridPosition, Vector2 gridPositionForWestExit, List<string> roomElementsRequiredForAdjoiningRoom)
     {
-        if (calculatedGridPosition.x == (gridLength - 1))
+        if (calculatedGridPosition.x == (GridConfiguration.size - 1))
         {
             if (roomElementsRequiredForAdjoiningRoom[i].Equals("sc"))
             {
                 // The room to the right must also have a closed north exit 'sc'
                 calculatedGridPosition += gridPositionForWestExit;
-                //PrintExitToGridPositionMapping(roomElementsRequiredForAdjoiningRoom[i], calculatedGridPosition, "MapBottomRowRoomsToHaveSouthClosedElement");
 
                 if (!requiredRoomElementsForGridPositions.ContainsKey(calculatedGridPosition))
                 {
@@ -620,7 +574,6 @@ public class LevelGenerator : MonoBehaviour
         {
             // The room to the right must also have a closed north exit 'nc'
             calculatedGridPosition += gridPositionForWestExit;
-            //PrintExitToGridPositionMapping(roomElementsRequiredForAdjoiningRoom[i], calculatedGridPosition, "MapRoomsWhichRequireWestElementToGridPosition");
 
             if (!requiredRoomElementsForGridPositions.ContainsKey(calculatedGridPosition))
             {
@@ -637,13 +590,53 @@ public class LevelGenerator : MonoBehaviour
         }
     }
 
+    void MapRoomsWhichRequireNorthClosedElementsToGridPosition(int i, Vector2 calculatedGridPosition, Vector2 gridPositionForNorthClosedElement, List<string> roomElementsRequiredForAdjoiningRoom)
+    {
+        if (roomElementsRequiredForAdjoiningRoom[i].Equals("sc"))
+        {
+            calculatedGridPosition += gridPositionForNorthClosedElement;
+
+            if (!requiredRoomElementsForGridPositions.ContainsKey(calculatedGridPosition))
+            {
+                // List of exits for specific grid positions
+                List<string> gridPositionExitList = new List<string>();
+                gridPositionExitList.Add("nc");
+                requiredRoomElementsForGridPositions.Add(calculatedGridPosition, gridPositionExitList);
+            }
+            else
+            {
+                requiredRoomElementsForGridPositions[calculatedGridPosition].Add("nc");
+            }
+        }
+    }
+
+    void MapRoomsWhichRequireNorthExitsToGridPosition(int i, Vector2 calculatedGridPosition, Vector2 gridPositionForNorthExit, List<string> roomElementsRequiredForAdjoiningRoom)
+    {
+        if (roomElementsRequiredForAdjoiningRoom[i].Equals("nm"))
+        {
+            calculatedGridPosition += gridPositionForNorthExit;
+
+            if (!requiredRoomElementsForGridPositions.ContainsKey(calculatedGridPosition))
+            {
+                // List of exits for specific grid positions
+                List<string> gridPositionExitList = new List<string>();
+                gridPositionExitList.Add(roomElementsRequiredForAdjoiningRoom[i]);
+                requiredRoomElementsForGridPositions.Add(calculatedGridPosition, gridPositionExitList);
+            }
+            else
+            {
+                requiredRoomElementsForGridPositions[calculatedGridPosition].Add(roomElementsRequiredForAdjoiningRoom[i]);
+            }
+        }
+    }
+
     // ***************************************************************************
     //                        ROOM SAVING AND LOADING
     // ***************************************************************************
 
-    void SaveRoomDetailsForLoading(string roomName, Vector2 worldPoint)
+    void SaveRoomDetailsForLoading(Vector2 worldPoint, string roomName)
     {
-        worldPositionAndRoomNameForLoadingLevel.Add(worldPoint, roomName);
+        area.pointAndRoomName.Add(worldPoint, roomName);
     }
 
     GameObject[] loadRooms(Dictionary<Vector2, string> roomInfo)
@@ -678,219 +671,7 @@ public class LevelGenerator : MonoBehaviour
         return rooms;
     }
 
-    // ***************************************************************************
-    //                              Debugging Methods
-    // ***************************************************************************
-
-    void PrintLevelGeneratorSetup()
-    {
-        if (levelGeneratorSetupDebuggingEnabled)
-        {
-            Debug.Log(" =========================== Setting Up Level Generator Rules ===========================");
-        }
-    }
-
-    void PrintExitMapperCompletion()
-    {
-        if (levelGeneratorSetupDebuggingEnabled)
-        {
-            Debug.Log("Exit Mapper Generation Competed");
-        }
-    }
-
-    void PrintStartAndEndRoomsGeneratedGridPositions(Vector2 startGridPosition, Vector2 endGridPosition)
-    {
-        if (levelGeneratorSetupDebuggingEnabled)
-        {
-            Debug.Log(" =========================== Setting Up Start And End Room Rules ===========================");
-            Debug.Log("Start Room Grid Position Generated At: " + startGridPosition);
-            Debug.Log("End Room Grid Position Generated At: " + endGridPosition);
-        }
-    }
-
-    void PrintCornerRoomsGeneratedGridPositions(Vector2 nwGridPosition, Vector2 neGridPosition, Vector2 swGridPosition, Vector2 seGridPosition)
-    {
-        if (levelGeneratorSetupDebuggingEnabled)
-        {
-            Debug.Log(" =========================== Setting Up Corner Room Rules ===========================");
-            Debug.Log("NW Room Grid Position Generated At: " + nwGridPosition);
-            Debug.Log("NE Room Grid Position Generated At: " + neGridPosition);
-            Debug.Log("SW Room Grid Position Generated At: " + swGridPosition);
-            Debug.Log("SE Room Grid Position Generated At: " + seGridPosition);
-        }
-    }
-
-    void PrintLevelGeneratorSetupCompleted()
-    {
-        if (levelGeneratorSetupDebuggingEnabled)
-        {
-            Debug.Log(" =========================== Level Generator Rules Setup Completed =========================== ");
-        }
-    }
-
-    void PrintGridGenerationStarting()
-    {
-        if (levelGeneratorSetupDebuggingEnabled)
-        {
-            Debug.Log("--------------------------- Grid Generation Starting --------------------------- ");
-        }
-    }
-
-    void PrintInitialRoomSelectedToStartLevelGenerator(int selectRandomNwCornerRoom)
-    {
-        if (gridGeneratorDebuggingEnabled && lowLevelDebuggingEnabled)
-        {
-            Debug.Log("Initial Corner Room Selected: " + nwCornerRooms[selectRandomNwCornerRoom]);
-        }  
-    }
-
-    void PrintCurrentRoomAndGridPositionInformation(Vector2 currentGridPosition, string roomName)
-    {
-        if (false)
-        {
-            Debug.Log("**********     Current Grid Position: " + currentGridPosition + "    |    Current Room Selected: " + roomName + "     **********");
-        }
-    }
-
-
-    void PrintRemovingRoomTypeElement(string roomTypeElement)
-    {
-        if (removingUnwantedRoomNameElementsDebuggingEnabled)
-        {
-            Debug.Log("Room Type Element Removed:  " + roomTypeElement);
-        }
-    }
-
-    void PrintRemovingRoomExitElement(string roomExitElement)
-    {
-        if (false)
-        {
-            Debug.Log("Room Exit Element Removed:  " + roomExitElement);
-        }
-    }
-
-    void PrintRoomElementsRequiredForAdjoiningRoomsAfterFiltering(Vector2 currentGridPosition, List<string> filteredRoomElements)
-    {
-        if (false)
-        {
-            string elements = "";
-
-            foreach (string element in filteredRoomElements)
-            {
-                elements += element + " ";
-            }
-
-            Debug.Log("Grid Position: " + currentGridPosition + "     |     "  +  "  Room Elements After Filtering: " + elements);
-        }
-    }
-
-    void PrintMapCurrentExitsToAdjoiningExits()
-    {
-        if (mapCurrentRoomElementsToAdjoiningRoomElementsDebuggingEnabled)
-        {
-            Debug.Log("=========================== Map Room Elements To Ajoining Room Elements ===========================");
-        }
-    }
-
-    void PrintRoomElementWithTheMappedElement(string roomElementAfterFiltering, string roomElementMapped)
-    {
-        if (mapCurrentRoomElementsToAdjoiningRoomElementsDebuggingEnabled)
-        {
-            Debug.Log("Current Room Element: " + roomElementAfterFiltering + "     |     Adjoining Room Element: " + roomElementMapped);
-        }
-    }
-
-    void PrintRoomElementAcceptedIntoRequiredElementsList(string roomElementAfterFiltering)
-    {
-        if (mapCurrentRoomElementsToAdjoiningRoomElementsDebuggingEnabled)
-        {
-            Debug.Log("Non Mappable But Required Room Element Added To Required Elements List: " + roomElementAfterFiltering);
-        }
-    }
-
-    void PrintMappingRequiredElementsForAdjoiningRooms()
-    {
-        if (mapRoomElementsToAdjoiningRoomGridPositionDebuggingEnabled)
-        {
-            Debug.Log("=========================== Map Room Elements To Ajoining Room Grid Position ===========================");
-        }
-    }
-
-    void PrintRoomSelectedAtGridPosition(string roomName, Vector2 gridPosition)
-    {
-        if (debuggingEnabled)
-        {
-            Debug.Log("Room Selected = " + roomName + " : Grid Position = " + gridPosition);
-        }
-    }
-
-    void PrintExtractedExits()
-    {
-        if (false)
-        {
-            for (int k = 0; k < requiredRoomElementsForConnectingAdjoiningRoom.Count; k++)
-            {
-                Debug.Log("Extracted Required Exit: " + requiredRoomElementsForConnectingAdjoiningRoom[k]);
-            }
-        }
-    }
-
-    void PrintExitToGridPositionMapping(string exit, Vector2 gridPosition, string methodName)
-    {
-        if (true)
-        {
-            Debug.Log("In Method: " + methodName + "     |     Room Element: " + exit + "     |    Mapped To Grid Position " + gridPosition);
-        }
-    }
-
-    void PrintDictionaryWithVector2KeyAndStringListValue(Dictionary<Vector2, List<string>> dictionary)
-    {
-        if (true)
-        {
-            //Debug.Log("=========================== Reading Grid Layout Dictionary =========================================");
-
-            for (int i = 0; i < requiredRoomElementsForGridPositions.Count; i++)
-            {
-                dictionary.ElementAt(i).Value.ForEach(j => Debug.Log("Grid Position = " + dictionary.ElementAt(i).Key + " : Required Exit = " + j));
-            }
-        }
-    }
-
-    void PrintSuitableRoomsForSelection(List<string> suitableRooms, List<string> requiredExits, Vector2 currentGridPosition)
-    {
-        if (false)
-        {
-            Debug.Log("================== Exits Required For Grid Position " + currentGridPosition + " ==================");
-            foreach (string exit in requiredExits)
-            {
-                Debug.Log("Exit this grid position must contain: " + exit);
-            }
-
-            Debug.Log("================== Rooms With Required Exits " + currentGridPosition + " ==================");
-            foreach (string room in suitableRooms)
-            {
-                Debug.Log("Room which contains all exits required: " + room);
-            }
-        }
-    }
-
-    /*void PrintDeafultRoomCreated(Vector2 currentGridPosition, List<string> requiredRoomElements)
-    {
-        for (int i = 0; i < requiredRoomElements.Count; i++)
-        {
-            Debug.Log("Grid Position: " + currentGridPosition + "     |     Required Room Element: " + requiredRoomElements[i]);
-        }
-    }*/
-
-    void PrintContentsOfVector2AndStringDictionary(Dictionary<Vector2, string> dictionary)
-    {
-        for (int i = 0; i < requiredRoomElementsForGridPositions.Count; i++)
-        {
-            Vector2 gridPos = dictionary.ElementAt(i).Key;
-            string roomName = dictionary.ElementAt(i).Value;
-            Debug.Log("     Grid Position: " + gridPos + "     |     Room Name: " + roomName);
-        }
-    }
+    
 
     /*// Start Room Selector
         if (startAndEndRoomGridPositions[0] == currentGridPosition)
@@ -904,18 +685,4 @@ public class LevelGenerator : MonoBehaviour
             return endRooms[0];
         }*/
 
-
-    // ----------------------------------------------------------------------------------
-    // Debugging
-    /* Debug.Log("Grid Position: " + currentGridPosition);
-     Debug.Log("Room Name: " + roomName);
-     string roomExitsExtracted = "";
-
-     for (int j = 0; j < roomExits.Length; j++)
-     {
-         roomExitsExtracted += roomExits[j] + " ";
-     }
-
-     Debug.Log("Uncleaned Room Exits: " + roomExitsExtracted);*/
-    // ----------------------------------------------------------------------------------
 }
