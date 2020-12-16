@@ -68,6 +68,7 @@ public class LevelGenerator : MonoBehaviour
                 CollectRequiredRoomElementsForAdjoiningRooms(currentGridPosition, currentRoom);
 
                 // Injecting Required Elements Missing From CollectRequiredRoomElementsForAdjoiningRooms
+                // wc for (0,0) is being passed in here through the required.....Room list
                 MapRequiredElementsForAjoiningRoomsToCorrectGridPositions(currentGridPosition, requiredRoomElementsForConnectingAdjoiningRoom);
 
                 // Debugging Purposes
@@ -321,9 +322,12 @@ public class LevelGenerator : MonoBehaviour
     
         string[] separatedElements = currentRoom.Split(roomElements.separator, StringSplitOptions.RemoveEmptyEntries);
 
-        List<string> roomElementsAfterFiltering = filterUnneededElements(currentGridPosition, separatedElements);
+        List<string> separatedElementsFiltered = FilterUnneededElementsForAdjoiningRooms(currentGridPosition, separatedElements);
 
-        DetermineRequiredAdjoiningRoomElements(roomElementsAfterFiltering);
+        // Inject Required Elements
+        List<string> separatedElementsFilteredAndInjected = InjectRequiredElementsForAdjoiningRooms(currentGridPosition, separatedElementsFiltered);
+
+        DetermineRequiredAdjoiningRoomElements(separatedElementsFilteredAndInjected);
     }
 
     void ClearRequiredRoomElementsForConnectingAdjoiningRoomList()
@@ -371,7 +375,7 @@ public class LevelGenerator : MonoBehaviour
         return separatedElementsList;
     }*/
 
-    List<string> filterUnneededElements(Vector2 currentGridPosition, string[] separatedElements)
+    List<string> FilterUnneededElementsForAdjoiningRooms(Vector2 currentGridPosition, string[] separatedElements)
     {
         List<string> separatedElementsList = separatedElements.ToList();
 
@@ -379,7 +383,11 @@ public class LevelGenerator : MonoBehaviour
 
         // Keep Elements Required For The Outside Of Grid
         RemoveNorthClosedElementUnlessInTheTopRowOfGrid(currentGridPosition.x, separatedElementsList);
+
+        // UNCLEAR WHETHER THIS METHOD WILL BE NEEDED OR NOT
         RemoveWestClosedElementUnlessInTheFirstColumnOfGrid(currentGridPosition.y, separatedElementsList);
+
+        // UNCLEAR WHETHER THIS METHOD WILL BE NEEDED OR NOT
         RemoveEastClosedElementUnlessInTheLastColumnOfGrid(currentGridPosition.y, separatedElementsList);
 
         // Advanced Rules For Removing Exits Which Are Not Required
@@ -439,6 +447,17 @@ public class LevelGenerator : MonoBehaviour
         }
     }
 
+    List<string> InjectRequiredElementsForAdjoiningRooms(Vector2 currentGridPosition, List<string> separatedElementsFiltered)
+    {
+        // Inject West Wall
+        if (currentGridPosition.y == 0 && (currentGridPosition.x > 0 && currentGridPosition.x < (GridConfiguration.size - 1)))
+        {
+            separatedElementsFiltered.Add(RoomElements.wc);
+        }
+
+        return separatedElementsFiltered;
+    }
+
     void DetermineRequiredAdjoiningRoomElements(List<string> roomElementsAfterFiltering)
     {
         for (int i = 0; i < roomElementsAfterFiltering.Count; i++)
@@ -476,7 +495,7 @@ public class LevelGenerator : MonoBehaviour
             // Can futher add to this method for room which have sc the room below must have an nc
             MapTopRowRoomsToHaveNorthClosedElement(i, calculatedGridPosition, gridPositionForWestElements, roomElementsRequiredForAdjoiningRoom);
 
-            if (calculatedGridPosition.y == (GridConfiguration.size - 2))
+            if (calculatedGridPosition.y == (GridConfiguration.size - 1))
             {
                 MapEastClosedElementToGridPositionsWhichRequiresIt(i, calculatedGridPosition, gridPositionForWestElements, roomElementsRequiredForAdjoiningRoom);
             }
@@ -484,12 +503,13 @@ public class LevelGenerator : MonoBehaviour
             // CAN RENAME LIKE EAST METHOD WAS
             MapBottomRowRoomsToHaveSouthClosedElement(i, calculatedGridPosition, gridPositionForWestElements, roomElementsRequiredForAdjoiningRoom);
 
-            // CAN RENAME LIKE EAST METHOD WAS
-            MapRoomsWhichRequireWestElementToGridPosition(i, calculatedGridPosition, gridPositionForWestElements, roomElementsRequiredForAdjoiningRoom);
+            // West Elements 
+            MapRequiredWestOpenElementsToGridPosition(i, calculatedGridPosition, gridPositionForWestElements, roomElementsRequiredForAdjoiningRoom);
+            MapRequiredWestClosedElementsToGridPosition(i, calculatedGridPosition, gridPositionForNorthElements, roomElementsRequiredForAdjoiningRoom);
 
-            MapRoomsWhichRequireNorthClosedElementsToGridPosition(i, calculatedGridPosition, gridPositionForNorthElements, roomElementsRequiredForAdjoiningRoom);
-
-            MapRoomsWhichRequireNorthExitsToGridPosition(i, calculatedGridPosition, gridPositionForNorthElements, roomElementsRequiredForAdjoiningRoom);
+            // North Elements 
+            MapRoomsRequiredNorthClosedElementsToGridPosition(i, calculatedGridPosition, gridPositionForNorthElements, roomElementsRequiredForAdjoiningRoom);
+            MapRequireNorthOpenElemetsToGridPosition(i, calculatedGridPosition, gridPositionForNorthElements, roomElementsRequiredForAdjoiningRoom);
         }
     }
 
@@ -568,7 +588,7 @@ public class LevelGenerator : MonoBehaviour
         } 
     }
 
-    void MapRoomsWhichRequireWestElementToGridPosition(int i, Vector2 calculatedGridPosition, Vector2 gridPositionForWestExit, List<string> roomElementsRequiredForAdjoiningRoom)
+    void MapRequiredWestOpenElementsToGridPosition(int i, Vector2 calculatedGridPosition, Vector2 gridPositionForWestExit, List<string> roomElementsRequiredForAdjoiningRoom)
     {
         if (roomElementsRequiredForAdjoiningRoom[i].StartsWith("w") && !roomElementsRequiredForAdjoiningRoom[i].Equals("wc"))
         {
@@ -590,7 +610,27 @@ public class LevelGenerator : MonoBehaviour
         }
     }
 
-    void MapRoomsWhichRequireNorthClosedElementsToGridPosition(int i, Vector2 calculatedGridPosition, Vector2 gridPositionForNorthClosedElement, List<string> roomElementsRequiredForAdjoiningRoom)
+    void MapRequiredWestClosedElementsToGridPosition(int i, Vector2 calculatedGridPosition, Vector2 gridPositionForNorthElements, List<string> roomElementsRequiredForAdjoiningRoom)
+    {
+        if (calculatedGridPosition.y == 0 && roomElementsRequiredForAdjoiningRoom[i].Equals(RoomElements.wc))
+        {
+            calculatedGridPosition += gridPositionForNorthElements; // Below Room Must Have West Exit
+
+            if (!requiredRoomElementsForGridPositions.ContainsKey(calculatedGridPosition))
+            {
+                // List of exits for specific grid positions
+                List<string> gridPositionExitList = new List<string>();
+                gridPositionExitList.Add(roomElementsRequiredForAdjoiningRoom[i]);
+                requiredRoomElementsForGridPositions.Add(calculatedGridPosition, gridPositionExitList);
+            }
+            else
+            {
+                requiredRoomElementsForGridPositions[calculatedGridPosition].Add(roomElementsRequiredForAdjoiningRoom[i]);
+            }
+        }
+    }
+
+    void MapRoomsRequiredNorthClosedElementsToGridPosition(int i, Vector2 calculatedGridPosition, Vector2 gridPositionForNorthClosedElement, List<string> roomElementsRequiredForAdjoiningRoom)
     {
         if (roomElementsRequiredForAdjoiningRoom[i].Equals("sc"))
         {
@@ -610,7 +650,7 @@ public class LevelGenerator : MonoBehaviour
         }
     }
 
-    void MapRoomsWhichRequireNorthExitsToGridPosition(int i, Vector2 calculatedGridPosition, Vector2 gridPositionForNorthExit, List<string> roomElementsRequiredForAdjoiningRoom)
+    void MapRequireNorthOpenElemetsToGridPosition(int i, Vector2 calculatedGridPosition, Vector2 gridPositionForNorthExit, List<string> roomElementsRequiredForAdjoiningRoom)
     {
         if (roomElementsRequiredForAdjoiningRoom[i].Equals("nm"))
         {
