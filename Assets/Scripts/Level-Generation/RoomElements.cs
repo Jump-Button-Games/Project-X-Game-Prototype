@@ -7,11 +7,11 @@ public class RoomElements
     // Closed Elements
     public const string nc = "nc";
     public const string ec = "ec";
-    const string sc = "sc";
+    public const string sc = "sc";
     public const string wc = "wc";
 
     // Open Elements
-    const string nm = "nm";
+    public const string nm = "nm";
     const string no = "no";
     const string nne = "nne";
     const string ne = "ne";
