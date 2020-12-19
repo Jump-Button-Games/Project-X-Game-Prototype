@@ -49,13 +49,8 @@ public class LevelGenerator : MonoBehaviour
     }
 
     // REFACTORED A LOT OF CODE
-    // TWO COMMON ISSUES WHICH NEED TO BE SORTED
-    // 1. SOME ROWS OF ROOM HAVE NO SOUTH EXIT AND THEREFORE INACCESSIBLE TO THE PLAYER
-    // 2. 'ec' ELEMENTS ARE BEING PICKED FOR MIDDLE GRID POSITIONS, CURRENTLY NOT HANDLED IN THE CODE, THIS CUTS OFF ROOMS FROM PLAYER 
-    //     AND HAS EXITS LEADING TO NO WHERE 'wo' -> 'ec' (NOT POSSIBLE TO DO THIS IN GAME)
-
-    // ONE BUG TO BE SORTED
-    // SOMETIMES AN INDEX OUT OF BOUNDS EXCEPTION IS THROWN, SEEMS AS IF IT CAN'T FIND A ROOM TO SELECT
+    // ONE COMMON ISSUES WHICH NEED TO BE SORTED
+    // SOME ROWS OF ROOM HAVE NO SOUTH EXIT AND THEREFORE INACCESSIBLE TO THE PLAYER
     void Start()
     {
         for (int row = 0; row < GridConfiguration.size; row++)
@@ -76,13 +71,23 @@ public class LevelGenerator : MonoBehaviour
                 // When This Methods Are Called, The Current Room Has ALREADY Been Chosen
                 // They Function To Determine The Required Elements For The NEXT Room
                 CollectRequiredElementsForAdjoiningRooms(currentGridPosition, currentRoom); // WE HAVE THE REQUIRED ELEMENTS
+
+                // Check elementsForAdjoiningGridPositions
+                //Debug.Log("Check Elements Collected Which Will Be Mapped: " + elementsForAdjoiningGridPositions);
+
                 //MapElementsForAdjoiningRoomsToGridPositions(currentGridPosition, requiredElementsForAdjoiningGridPositions);
                 MapRequiredElementsForAdjoiningRoomsToGridPositions(currentGridPosition); // NOW MAP THE ELEMENTS , requiredElementsForAdjoiningGridPositions
 
                 // Debugging Purposes
                 gridPositionsWithCorrespondingRoomNames.Add(currentGridPosition, currentRoom);
 
-                SaveRoomDetailsForLoading(worldPoint, currentRoom);
+                //SaveRoomDetailsForLoading(worldPoint, currentRoom);
+
+                // Print Out Grid Position And It's Required Elements
+                /*for (int i = 0; i < mappedElementsToGridPositions.Count; i++)
+                {
+                    mappedElementsToGridPositions.ElementAt(i).Value.ForEach(j => Debug.Log("       Grid Position = " + mappedElementsToGridPositions.ElementAt(i).Key + "  |     Required Exit = " + j));
+                }*/
             }
         }
 
@@ -220,15 +225,11 @@ public class LevelGenerator : MonoBehaviour
         }
         else
         {
-            // No exits to check
-            // This happens when on (1,0) where (0,0) has no south exit, need a default for these Rooms
-            //// TODO: STRAIGHT UP HARD CODING THE DEFAULT ROOM CURRENTLY, FIND BETTER SOLUTION
-            elementsRequiredForCurrentGridPosition = CreateDefaultRoomElementsForCurrentGridPosition(currentGridPosition);
+            // TODO: THIS CODE NEEDS TO BE HANDLED BETTER, IN FACT ALL ROOM SELECTOR CODE CAN BE REFACTORED OR CLEANED UP
+            elementsRequiredForCurrentGridPosition = null;
         }
 
-        // -------------------------------------------
-        // Need A Better Way To Handle This NULL Check
-        // -------------------------------------------
+        // TODO: THIS CODE NEEDS TO BE HANDLED BETTER
         if (elementsRequiredForCurrentGridPosition == null)
         {
             // If NULL does that mean any room can be selected?
@@ -278,42 +279,6 @@ public class LevelGenerator : MonoBehaviour
         return listOfRooms[selectRandomNwCornerRoom];
     }
 
-    // TODO: AVOID HARD CODING THE DEFAULT ROOM
-    List<string> CreateDefaultRoomElementsForCurrentGridPosition(Vector2 currentGridPosition)
-    {
-        List<string> requiredRoomElements = new List<string>();
-
-        if (currentGridPosition.y == 0) // First Column
-        {
-            // Enter Into The Grid at the current Grid Position A Default Requirement Of A wc
-            requiredRoomElements.Add("wc");
-            requiredRoomElements.Add("nc");
-            requiredRoomElements.Add("sc");
-            requiredRoomElements.Add("eo");
-            mappedElementsToGridPositions.Add(currentGridPosition, requiredRoomElements);
-        }
-
-        if (currentGridPosition.y > 0 && currentGridPosition.y < (GridConfiguration.size - 1)) // In-between end columns
-        {
-            requiredRoomElements.Add("wo");
-            requiredRoomElements.Add("nc");
-            requiredRoomElements.Add("sc");
-            requiredRoomElements.Add("eo");
-            mappedElementsToGridPositions.Add(currentGridPosition, requiredRoomElements);
-        }
-
-        if (currentGridPosition.y == (GridConfiguration.size - 1)) // In-between end columns
-        {
-            requiredRoomElements.Add("wo");
-            requiredRoomElements.Add("nc");
-            requiredRoomElements.Add("sc");
-            requiredRoomElements.Add("ec");
-            mappedElementsToGridPositions.Add(currentGridPosition, requiredRoomElements);
-        }
-
-        return requiredRoomElements;
-    }
-
     string SelectRandomRoomWhichMeetsElementsRequirements(List<string> roomsWhichMeetTheExitRequirements, Vector2 currentGridPosition)
     {
         int selectRandomRoom = UnityEngine.Random.Range(0, roomsWhichMeetTheExitRequirements.Count);
@@ -329,6 +294,7 @@ public class LevelGenerator : MonoBehaviour
         string[] separatedElements = currentRoom.Split(roomElements.separator, StringSplitOptions.RemoveEmptyEntries);
 
         // Elements Which Connect To Adjoining Rooms
+        // 'sc's not being removed so are in the openElements List
         List<string> openElements = ExtractOpenElements(currentGridPosition, separatedElements);
 
         // Inject Closed Elements For Outer Walls
@@ -353,12 +319,11 @@ public class LevelGenerator : MonoBehaviour
         RemoveNorthClosedElement(separatedElementsList);
         RemoveEastClosedElement(separatedElementsList);
         RemoveWestClosedElement(separatedElementsList);
+        RemoveSouthClosedElement(separatedElementsList);
 
-        // MAY ALWAYS NEED AN 'sc'. CODE LATER DETERMINES WHETHER IT CAN HAVE AN OPEN ELEMENT OR NOT
-
-        // CHECK ON THIS CODE LATER
-        // Advanced Rules For Removing Exits Which Are Not Required
-        RemoveEastExitRequirementExceptForLastColumn(currentGridPosition.y, separatedElementsList);
+        // TODO: REFACTOR THIS BIT OF CODE, MAY BE A BETTER PLACE FOR IT
+        // THIS IS AN ADVANCED RULE TO STOP 'ec' ELEMENTS APPEARING IN THE MIDDLE OF THE GRID
+        InjectEastOpenElement(currentGridPosition.y, separatedElementsList);
 
         return separatedElementsList;
     }
@@ -384,6 +349,14 @@ public class LevelGenerator : MonoBehaviour
         }
     }
 
+    void RemoveSouthClosedElement(List<string> separatedElementsList)
+    {
+        if (separatedElementsList.Contains(RoomElements.sc))
+        {
+            separatedElementsList.Remove(RoomElements.sc);
+        }
+    }
+
     void RemoveWestClosedElement(List<string> separatedElementsList)
     {
         if (separatedElementsList.Contains(RoomElements.wc))
@@ -392,10 +365,14 @@ public class LevelGenerator : MonoBehaviour
         }
     }
 
-    // MAYBE SHOULD BE PULLED FROM THE ExtractOpenElements METHOD
-    void RemoveEastExitRequirementExceptForLastColumn(float currentGridColumn, List<string> separatedElementsList)
+    void InjectEastOpenElement(float currentGridColumn, List<string> separatedElementsList)
     {
-        if (separatedElementsList.Contains(RoomElements.wo) && separatedElementsList.Count >= 2 && currentGridColumn != (GridConfiguration.size - 1))
+        if (!separatedElementsList.Contains(RoomElements.wo) && currentGridColumn < (GridConfiguration.size - 2))
+        {
+            separatedElementsList.Add(RoomElements.wo);
+        }
+
+        if (separatedElementsList.Contains(RoomElements.wo) && currentGridColumn == (GridConfiguration.size - 2) && separatedElementsList.Count >= 2)
         {
             separatedElementsList.Remove(RoomElements.wo);
         }
@@ -407,6 +384,8 @@ public class LevelGenerator : MonoBehaviour
         InjectNorthClosedElementForTopWall(currentGridPosition, separatedElementsFiltered);
 
         InjectEastClosedElementForRightWall(currentGridPosition, separatedElementsFiltered);
+
+        InjectSouthClosedElementForSouthWall(currentGridPosition, separatedElementsFiltered); // South Wall In Every Room Is Always Required Unless An 'sm' Exists
 
         InjectWestClosedElementForLeftWall(currentGridPosition, separatedElementsFiltered);
 
@@ -426,6 +405,14 @@ public class LevelGenerator : MonoBehaviour
         if (currentGridPosition.y == (GridConfiguration.size - 1))
         {
             separatedElementsFiltered.Add(RoomElements.ec);
+        }
+    }
+
+    void InjectSouthClosedElementForSouthWall(Vector2 currentGridPosition, List<string> separatedElementsFiltered)
+    {
+        if (!separatedElementsFiltered.Contains(RoomElements.sm))
+        {
+            separatedElementsFiltered.Add(RoomElements.sc);
         }
     }
 
@@ -451,14 +438,11 @@ public class LevelGenerator : MonoBehaviour
                 && !roomElementsAfterFiltering[i].Equals(RoomElements.ec) && !roomElementsAfterFiltering[i].Equals(RoomElements.sc))
             {
                 elementsForAdjoiningGridPositions.Add(openElementsMapper[roomElementsAfterFiltering[i]]);
-            }            
+            }
         }
     }
 
-    // SEEMS TO BE WORKING
-    // THERE IS A BIT OF AMIBUITY AS TO WHICH METHODS MUST CHECK WHETHER THE elementsForAdjoiningGridPositions LIST CONTAINS OR DOESN'T CONTAIN THE ELEMENT
-    // SOME MUST CHECK THEY DO CONTAIN AND OTHER MUST CHECK THEY DON'T CONTAIN
-    // SOME CONSISTENCY HERE WOULD BE WELCOMED TO AVOID FUTURE CONFUSION
+   
     void MapRequiredElementsForAdjoiningRoomsToGridPositions(Vector2 currentGridPosition)
     {
         Vector2 southAdjoiningGridPosition = new Vector2(1, 0);
@@ -467,50 +451,54 @@ public class LevelGenerator : MonoBehaviour
         // Map Closed Elements To Dictionary
         MapNorthClosedElements(currentGridPosition, eastAdjoiningGridPosition, southAdjoiningGridPosition);
         MapEastClosedElements(currentGridPosition, eastAdjoiningGridPosition);
-        MapSouthClosedElements(currentGridPosition, southAdjoiningGridPosition);
+        MapSouthClosedElements(currentGridPosition, eastAdjoiningGridPosition);
         MapWestClosedElements(currentGridPosition, southAdjoiningGridPosition);
 
         // Map Open Elements To Dictionary
         MapNorthOpenElements(currentGridPosition, southAdjoiningGridPosition);
         MapWestOpenElements(currentGridPosition, eastAdjoiningGridPosition);
+        MapEastOpenElements(currentGridPosition, eastAdjoiningGridPosition);
     }
 
     void MapNorthClosedElements(Vector2 currentGridPosition, Vector2 eastAdjoiningGridPosition, Vector2 southAdjoiningGridPosition)
     {
-        Vector2 calculatedAdjoiningGridPosition;
+        Vector2 calculatedEastAdjoiningGridPosition = currentGridPosition;
 
         // If Room Is Located In Top Row Of Grid Then Next Room To The Right Must Contain A North Closed Exit
         if (currentGridPosition.x == 0)
         {
-            calculatedAdjoiningGridPosition = (currentGridPosition += eastAdjoiningGridPosition); // Take Current Grid Position And Move It To The Right Of The Grid 1 Place
+            calculatedEastAdjoiningGridPosition += eastAdjoiningGridPosition; // Take Current Grid Position And Move It To The Right Of The Grid 1 Place
 
             if (elementsForAdjoiningGridPositions.Contains(RoomElements.nc))
             {
-                if (!mappedElementsToGridPositions.ContainsKey(calculatedAdjoiningGridPosition)) // If Position Has Not Previously Been Entered Into Dictionary
+                if (!mappedElementsToGridPositions.ContainsKey(calculatedEastAdjoiningGridPosition)) // If Position Has Not Previously Been Entered Into Dictionary
                 {
                     List<string> elementsForCalculatedGridPosition = new List<string>() { RoomElements.nc }; // Create New List With 'nc' Element
-                    mappedElementsToGridPositions.Add(calculatedAdjoiningGridPosition, elementsForCalculatedGridPosition); // Add Position And List To Dictionary
+                    mappedElementsToGridPositions.Add(calculatedEastAdjoiningGridPosition, elementsForCalculatedGridPosition); // Add Position And List To Dictionary
                 }
                 else
                 {
-                    mappedElementsToGridPositions[calculatedAdjoiningGridPosition].Add(RoomElements.nc); // Grid Position Already Exists So Add 'nc' Element To Its List
+                    mappedElementsToGridPositions[calculatedEastAdjoiningGridPosition].Add(RoomElements.nc); // Grid Position Already Exists So Add 'nc' Element To Its List
                 }
             }
         }
 
+        // Need To Use New Variable If More Than One Mapping In A Method
+        Vector2 calculatedSouthAdjoiningGridPosition = currentGridPosition;
+
         // If Room Contains A South Closed Element Then Below Room Must Contain A North Closed Exit
         if (elementsForAdjoiningGridPositions.Contains(RoomElements.sc))
         {
-            calculatedAdjoiningGridPosition = (currentGridPosition += southAdjoiningGridPosition);
+            calculatedSouthAdjoiningGridPosition += southAdjoiningGridPosition;
 
-            if (!mappedElementsToGridPositions.ContainsKey(calculatedAdjoiningGridPosition)) // If Position Has Not Previously Been Entered Into Dictionary
+            if (!mappedElementsToGridPositions.ContainsKey(calculatedSouthAdjoiningGridPosition)) // If Position Has Not Previously Been Entered Into Dictionary
             {
                 List<string> elementsForCalculatedGridPosition = new List<string>() { RoomElements.nc }; // Create New List With 'nc' Element
-                mappedElementsToGridPositions.Add(calculatedAdjoiningGridPosition, elementsForCalculatedGridPosition); // Add Position And List To Dictionary
+                mappedElementsToGridPositions.Add(calculatedSouthAdjoiningGridPosition, elementsForCalculatedGridPosition); // Add Position And List To Dictionary
             }
             else
             {
-                mappedElementsToGridPositions[calculatedAdjoiningGridPosition].Add(RoomElements.nc); // Grid Position Already Exists So Add 'nc' Element To Its List
+                mappedElementsToGridPositions[calculatedSouthAdjoiningGridPosition].Add(RoomElements.nc); // Grid Position Already Exists So Add 'nc' Element To Its List
             }
         }
     }
@@ -538,13 +526,13 @@ public class LevelGenerator : MonoBehaviour
         }
     }
 
-    void MapSouthClosedElements(Vector2 currentGridPosition, Vector2 southAdjoiningGridPosition)
+    void MapSouthClosedElements(Vector2 currentGridPosition, Vector2 eastAdjoiningGridPosition)
     {
         Vector2 calculatedAdjoiningGridPosition;
 
         if (currentGridPosition.x == (GridConfiguration.size - 1))
         {
-            calculatedAdjoiningGridPosition = (currentGridPosition += southAdjoiningGridPosition); // Take Current Grid Position And Move It Down The Grid 1 Place
+            calculatedAdjoiningGridPosition = (currentGridPosition += eastAdjoiningGridPosition); // Take Current Grid Position And Move It Down The Grid 1 Place
 
             if (elementsForAdjoiningGridPositions.Contains(RoomElements.sc))
             {
@@ -620,6 +608,26 @@ public class LevelGenerator : MonoBehaviour
             else
             {
                 mappedElementsToGridPositions[calculatedAdjoiningGridPosition].Add(RoomElements.wo); // Grid Position Already Exists So Add 'wo' Element To Its List
+            }
+        }
+    }
+
+    void MapEastOpenElements(Vector2 currentGridPosition, Vector2 eastAdjoiningGridPosition)
+    {
+        Vector2 calculatedAdjoiningGridPosition;
+
+        if (elementsForAdjoiningGridPositions.Contains(RoomElements.eo))
+        {
+            calculatedAdjoiningGridPosition = (currentGridPosition += eastAdjoiningGridPosition); // Take Current Grid Position And Move It To The Right Of The Grid 1 Place
+
+            if (!mappedElementsToGridPositions.ContainsKey(calculatedAdjoiningGridPosition))
+            {
+                List<string> elementsForCalculatedGridPosition = new List<string>() { RoomElements.eo }; // Create New List With 'wo' Element
+                mappedElementsToGridPositions.Add(calculatedAdjoiningGridPosition, elementsForCalculatedGridPosition); // Add Position And List To Dictionary
+            }
+            else
+            {
+                mappedElementsToGridPositions[calculatedAdjoiningGridPosition].Add(RoomElements.eo); // Grid Position Already Exists So Add 'wo' Element To Its List
             }
         }
     }

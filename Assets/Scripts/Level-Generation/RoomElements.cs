@@ -17,11 +17,11 @@ public class RoomElements
     const string ne = "ne";
     const string ene = "ene";
     const string em = "em";
-    const string eo = "eo";
+    public const string eo = "eo";
     const string ese = "ese";
     const string se = "se";
     const string sse = "sse";
-    const string sm = "sm";
+    public const string sm = "sm";
     const string so = "so";
     const string ssw = "ssw";
     const string sw = "sw";
