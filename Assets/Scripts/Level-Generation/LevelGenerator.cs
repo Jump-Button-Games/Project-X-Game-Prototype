@@ -33,7 +33,7 @@ public class LevelGenerator : MonoBehaviour
 
     // Loading
     // Store prefabs for loading rooms
-    readonly GameObject[] roomsGO;
+    GameObject[] roomPrefabs;
 
     void Awake()
     {
@@ -67,7 +67,7 @@ public class LevelGenerator : MonoBehaviour
                 // The Elements Of This Room Will Be Used To Determine What Elements Are Required For Its Adjoining Rooms
                 SelectRoomForCurrentGridPosition(currentGridPosition);
 
-                Debug.Log("Current Grid Position: " + currentGridPosition + "   |   Current Room Selected: " + currentRoom);
+                //Debug.Log("Current Grid Position: " + currentGridPosition + "   |   Current Room Selected: " + currentRoom);
 
                 // These Methods Are To Collect The Correct Elements Required And Map Them To The Correct Grid Positions
                 // On The Next Iteration The Elements Will Be Checked And Will Tell The Room Selector What Elements Are Absolutely Required For The Current Grid Position
@@ -84,7 +84,7 @@ public class LevelGenerator : MonoBehaviour
                 // Debugging Purposes
                 gridPositionsWithCorrespondingRoomNames.Add(currentGridPosition, currentRoom);
 
-                //SaveRoomDetailsForLoading(worldPoint, currentRoom);
+                SaveRoomDetailsForLoading(worldPoint, currentRoom);
 
                 // Print Out Grid Position And It's Required Elements
                 /*for (int i = 0; i < mappedElementsToGridPositions.Count; i++)
@@ -96,30 +96,53 @@ public class LevelGenerator : MonoBehaviour
             //levelGeneratorDebugger.PrintDictionaryWithVector2KeyAndStringListValue(mappedElementsToGridPositions);
         }
 
-        levelGeneratorDebugger.PrintContentsOfVector2AndStringDictionary(gridPositionsWithCorrespondingRoomNames);
+        //levelGeneratorDebugger.PrintContentsOfVector2AndStringDictionary(gridPositionsWithCorrespondingRoomNames);
 
         // WORKING CODE: THIS MIGHT BE ABLE TO BE PUT INTO A SINGLE METHOD TO CLEAN IT UP
 
+
+        //Debug.Log("Number Of Rooms In  area.pointAndRoomName: " + area.pointAndRoomName.Count);
+
         // GameObject Array to store the loaded prefabs
-        /*rooms = new GameObject[roomInfo.Count];
+        roomPrefabs = new GameObject[area.pointAndRoomName.Count];
 
         // ===================================================
         // Method required to filter what type of room to load
         // ===================================================
-        rooms = loadRooms(roomInfo);
+        roomPrefabs = loadRooms(area.pointAndRoomName);
 
-        int counter = 0;
+        /*int counter = 0;
 
-        foreach (GameObject room in rooms)
+        foreach (GameObject roomPrefab in roomPrefabs)
         {
             // Set Transform to world coordinates
             // Retrieve the world coordiantes from the Dictionary
-            room.transform.position = new Vector3(roomInfo.ElementAt(counter).Key.x, roomInfo.ElementAt(counter).Key.y, 0);
+            roomPrefab.transform.position = new Vector3(area.pointAndRoomName.ElementAt(counter).Key.x, area.pointAndRoomName.ElementAt(counter).Key.y, 0);
 
-            Instantiate(room, room.transform.position, room.transform.rotation);
+            Debug.Log("Room: " + roomPrefab);
+            Debug.Log("Room Point: " + roomPrefab.transform.position);
+            Debug.Log("Room Rotation: " + roomPrefab.transform.rotation);
+
+            //Instantiate(room, room.transform.position, room.transform.rotation);
 
             counter++;
+            Debug.Log("Counter: " + counter);
         }*/
+
+        //Instantiate(roomPrefabs[0], roomPrefabs[0].transform.position, roomPrefabs[0].transform.rotation);
+
+        for (int k = 0; k < roomPrefabs.Length; k++)
+        {
+            //Debug.Log("Room Number: " + k);
+
+            roomPrefabs[k].transform.position = new Vector3(area.pointAndRoomName.ElementAt(k).Key.x, area.pointAndRoomName.ElementAt(k).Key.y, 0);
+
+            Instantiate(roomPrefabs[k], roomPrefabs[k].transform.position, roomPrefabs[k].transform.rotation);
+
+            /*Debug.Log("Room: " + roomPrefabs[k]);
+            Debug.Log("Room Point: " + roomPrefabs[k].transform.position);
+            Debug.Log("Room Rotation: " + roomPrefabs[k].transform.rotation);*/
+        }
 
     }
 
