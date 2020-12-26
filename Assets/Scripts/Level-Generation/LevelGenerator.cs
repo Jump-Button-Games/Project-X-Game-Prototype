@@ -51,9 +51,6 @@ public class LevelGenerator : MonoBehaviour
         SouthExitOnEachRowRule();
     }
 
-    // REFACTORED A LOT OF CODE
-    // ONE COMMON ISSUES WHICH NEED TO BE SORTED
-    // SOME ROWS OF ROOM HAVE NO SOUTH EXIT AND THEREFORE INACCESSIBLE TO THE PLAYER
     void Start()
     {
         for (int row = 0; row < GridConfiguration.size; row++)
@@ -75,73 +72,24 @@ public class LevelGenerator : MonoBehaviour
                 // They Function To Determine The Required Elements For The NEXT Room
                 CollectRequiredElementsForAdjoiningRooms(currentGridPosition, currentRoom); // WE HAVE THE REQUIRED ELEMENTS
 
-                // Check elementsForAdjoiningGridPositions
-                //Debug.Log("Check Elements Collected Which Will Be Mapped: " + elementsForAdjoiningGridPositions);
-
-                //MapElementsForAdjoiningRoomsToGridPositions(currentGridPosition, requiredElementsForAdjoiningGridPositions);
-                MapRequiredElementsForAdjoiningRoomsToGridPositions(currentGridPosition); // NOW MAP THE ELEMENTS , requiredElementsForAdjoiningGridPositions
+                MapRequiredElementsForAdjoiningRoomsToGridPositions(currentGridPosition);
 
                 // Debugging Purposes
                 gridPositionsWithCorrespondingRoomNames.Add(currentGridPosition, currentRoom);
 
                 SaveRoomDetailsForLoading(worldPoint, currentRoom);
-
-                // Print Out Grid Position And It's Required Elements
-                /*for (int i = 0; i < mappedElementsToGridPositions.Count; i++)
-                {
-                    mappedElementsToGridPositions.ElementAt(i).Value.ForEach(j => Debug.Log("       Grid Position = " + mappedElementsToGridPositions.ElementAt(i).Key + "  |     Required Exit = " + j));
-                }*/
             }
-
-            //levelGeneratorDebugger.PrintDictionaryWithVector2KeyAndStringListValue(mappedElementsToGridPositions);
         }
 
-        //levelGeneratorDebugger.PrintContentsOfVector2AndStringDictionary(gridPositionsWithCorrespondingRoomNames);
-
-        // WORKING CODE: THIS MIGHT BE ABLE TO BE PUT INTO A SINGLE METHOD TO CLEAN IT UP
-
-
-        //Debug.Log("Number Of Rooms In  area.pointAndRoomName: " + area.pointAndRoomName.Count);
-
-        // GameObject Array to store the loaded prefabs
         roomPrefabs = new GameObject[area.pointAndRoomName.Count];
 
-        // ===================================================
-        // Method required to filter what type of room to load
-        // ===================================================
         roomPrefabs = loadRooms(area.pointAndRoomName);
-
-        /*int counter = 0;
-
-        foreach (GameObject roomPrefab in roomPrefabs)
-        {
-            // Set Transform to world coordinates
-            // Retrieve the world coordiantes from the Dictionary
-            roomPrefab.transform.position = new Vector3(area.pointAndRoomName.ElementAt(counter).Key.x, area.pointAndRoomName.ElementAt(counter).Key.y, 0);
-
-            Debug.Log("Room: " + roomPrefab);
-            Debug.Log("Room Point: " + roomPrefab.transform.position);
-            Debug.Log("Room Rotation: " + roomPrefab.transform.rotation);
-
-            //Instantiate(room, room.transform.position, room.transform.rotation);
-
-            counter++;
-            Debug.Log("Counter: " + counter);
-        }*/
-
-        //Instantiate(roomPrefabs[0], roomPrefabs[0].transform.position, roomPrefabs[0].transform.rotation);
 
         for (int k = 0; k < roomPrefabs.Length; k++)
         {
-            //Debug.Log("Room Number: " + k);
-
             roomPrefabs[k].transform.position = new Vector3(area.pointAndRoomName.ElementAt(k).Key.x, area.pointAndRoomName.ElementAt(k).Key.y, 0);
 
             Instantiate(roomPrefabs[k], roomPrefabs[k].transform.position, roomPrefabs[k].transform.rotation);
-
-            /*Debug.Log("Room: " + roomPrefabs[k]);
-            Debug.Log("Room Point: " + roomPrefabs[k].transform.position);
-            Debug.Log("Room Rotation: " + roomPrefabs[k].transform.rotation);*/
         }
 
     }
@@ -195,28 +143,20 @@ public class LevelGenerator : MonoBehaviour
     {
         // Number of Possible Rows and Columns
         int numberOfPossibleExitsPerRow = (GridConfiguration.size - 2); 
-        //Debug.Log("Number of possible exits: " + numberOfPossibleExitsPerRow);
         int numberOfRows = (GridConfiguration.size - 1);
         int minimumNumberOfExitsAllowed = 1;
 
         for (int i = 0; i < numberOfRows; i++)
         {
             int randomlySelectedSouthExits = UnityEngine.Random.Range(minimumNumberOfExitsAllowed, numberOfPossibleExitsPerRow + 1); // + 1 to include the highest number
-            
-            //Debug.Log("Number Of South Exits Selected For Row " + i + " is: " + randomlySelectedSouthExits);
-            
+               
             List<bool> exitsPerColumn = new List<bool>();
 
             List<bool> shuffledList = DetermineWhichColumnsHaveExits(numberOfPossibleExitsPerRow, randomlySelectedSouthExits, exitsPerColumn);
 
-            // Inner For loop For Columns
-            // If element in list contains true add 'nc' to dictionary for that position
             int listElement = 0;
             for (int j = 1; j <= numberOfPossibleExitsPerRow; j++)
             {
-                /*Debug.Log("J = " + j);
-                Debug.Log("List Element = " + listElement);*/
-
                 if (shuffledList[listElement] == true)
                 {
                     Vector2 gridPosition = new Vector2(i,j);
@@ -224,11 +164,7 @@ public class LevelGenerator : MonoBehaviour
                 }
                 listElement++;
             }
-
-
         }
-
-        //levelGeneratorDebugger.PrintDictionaryWithVector2KeyAndStringListValue(mappedElementsToGridPositions);
     }
 
     List<bool> DetermineWhichColumnsHaveExits(int numberOfPossibleExitsPerRow, int randomlySelectedSouthExits, List<bool> exitsPerColumn)
@@ -248,11 +184,6 @@ public class LevelGenerator : MonoBehaviour
         }
 
         List<bool> shuffled = exitsPerColumn.OrderBy(x => Guid.NewGuid()).ToList();
-
-        /*for (int i = 0; i < exitsPerColumn.Count; i++)
-        {
-            Debug.Log("Element " + i + " is: " + shuffled[i]);
-        }*/
 
         return shuffled;
     }
@@ -316,11 +247,6 @@ public class LevelGenerator : MonoBehaviour
         if (mappedElementsToGridPositions.ContainsKey(currentGridPosition))
         {
             elementsRequiredForCurrentGridPosition = mappedElementsToGridPositions[currentGridPosition];
-
-            foreach (string element in elementsRequiredForCurrentGridPosition)
-            {
-                //Debug.Log("Element Required: " + element + " For Grid Position: " + currentGridPosition);
-            }
         }
         else
         {
@@ -730,9 +656,9 @@ public class LevelGenerator : MonoBehaviour
         }
     }
 
-    // ***************************************************************************
-    //                        ROOM SAVING AND LOADING
-    // ***************************************************************************
+    /*
+     *      STEP 3: SAVE AND LOAD ROOMS
+     */
 
     void SaveRoomDetailsForLoading(Vector2 worldPoint, string roomName)
     {
@@ -741,23 +667,12 @@ public class LevelGenerator : MonoBehaviour
 
     GameObject[] loadRooms(Dictionary<Vector2, string> roomInfo)
     {
-        // Initialise Array
         GameObject[] rooms = new GameObject[roomInfo.Count];
 
-        // Get the Room Name from Dictionary
-
-        // Parse first part of name and build string to determine what folder to load
-        // cr/cr-nw
-        // l/l-1
-        // lk-nc-eo-sc-wo
-
-        // Split RoomName based the hyphen
         String[] spearator = { "-" };
 
-        // Loop through the dictionary
         for (int i = 0; i < roomInfo.Count; i++)
         {
-            // Split Room Name and Store Each Part In An Array 
             String[] roomCode = roomInfo.ElementAt(i).Value.Split(spearator, StringSplitOptions.RemoveEmptyEntries);
 
             //Debug.Log("Path Name: " + roomCode[0] + "/" + roomInfo.ElementAt(i).Value);
