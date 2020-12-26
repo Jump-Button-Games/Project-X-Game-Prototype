@@ -11,7 +11,7 @@ public class Rooms
     public readonly List<string> seCornerRooms = new List<string> { "cr-nc-ec-sc-wo" };
 
     // Link Room Codes
-    public readonly List<string> linkRooms = new List<string> { "lk-nc-eo-sc-wo", "lk-nc-eo-sc-wc", "lk-nc-ec-sc-wo", "lk-nc-eo-sm-wo", "lk-nm-eo-sc-wo" };
+    public readonly List<string> linkRooms = new List<string> { "lk-nc-eo-sc-wo", "lk-nc-eo-sc-wc", "lk-nc-ec-sc-wo", "lk-nc-eo-sm-wo", "lk-nm-eo-sm-wo", "lk-nm-eo-sc-wo" };
     // "lk-n-eo-s-wo", "lk-nc-eo-sc-wc", "lk-n-eo-sc-wc", "lk-nc-eo-s-wo", "lk-nc-ec-s-wo", "lk-nc-ec-sc-wo" "lk-nc-eo-s-wo", "lk-n-eo-sc-wo" 
 
     // Start and End Rooms

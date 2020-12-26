@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class LevelGeneratorDebugger
@@ -16,6 +17,29 @@ public class LevelGeneratorDebugger
     // ***************************************************************************
     //                              Debugging Methods
     // ***************************************************************************
+
+    public void PrintDictionaryWithVector2KeyAndStringListValue(Dictionary<Vector2, List<string>> dictionary)
+    {
+        if (true)
+        {
+            //Debug.Log("=========================== Reading Grid Layout Dictionary =========================================");
+
+            for (int i = 0; i < dictionary.Count; i++)
+            {
+                dictionary.ElementAt(i).Value.ForEach(j => Debug.Log("Grid Position = " + dictionary.ElementAt(i).Key + " : Required Exit = " + j));
+            }
+        }
+    }
+
+    public void PrintContentsOfVector2AndStringDictionary(Dictionary<Vector2, string> dictionary)
+    {
+        for (int i = 0; i < dictionary.Count; i++)
+        {
+            Vector2 gridPos = dictionary.ElementAt(i).Key;
+            string roomName = dictionary.ElementAt(i).Value;
+            Debug.Log("     Grid Position: " + gridPos + "     |     Room Name: " + roomName);
+        }
+    }
 
     /*void PrintLevelGeneratorSetup()
     {
@@ -178,18 +202,7 @@ public class LevelGeneratorDebugger
         }
     }
 
-    void PrintDictionaryWithVector2KeyAndStringListValue(Dictionary<Vector2, List<string>> dictionary)
-    {
-        if (false)
-        {
-            //Debug.Log("=========================== Reading Grid Layout Dictionary =========================================");
-
-            for (int i = 0; i < requiredRoomElementsForGridPositions.Count; i++)
-            {
-                dictionary.ElementAt(i).Value.ForEach(j => Debug.Log("Grid Position = " + dictionary.ElementAt(i).Key + " : Required Exit = " + j));
-            }
-        }
-    }
+    
 
     void PrintSuitableRoomsForSelection(List<string> suitableRooms, List<string> requiredExits, Vector2 currentGridPosition)
     {
@@ -217,13 +230,5 @@ public class LevelGeneratorDebugger
         }
     }*//*
 
-    void PrintContentsOfVector2AndStringDictionary(Dictionary<Vector2, string> dictionary)
-    {
-        for (int i = 0; i < requiredRoomElementsForGridPositions.Count; i++)
-        {
-            Vector2 gridPos = dictionary.ElementAt(i).Key;
-            string roomName = dictionary.ElementAt(i).Value;
-            Debug.Log("     Grid Position: " + gridPos + "     |     Room Name: " + roomName);
-        }
-    }*/
+    */
 }

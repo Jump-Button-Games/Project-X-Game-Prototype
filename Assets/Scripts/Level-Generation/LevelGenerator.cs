@@ -27,7 +27,9 @@ public class LevelGenerator : MonoBehaviour
     string currentRoom;
 
     // Debugging Purposes
+    LevelGeneratorDebugger levelGeneratorDebugger = new LevelGeneratorDebugger();
     Dictionary<Vector2, string> gridPositionsWithCorrespondingRoomNames = new Dictionary<Vector2, string>();
+
 
     // Loading
     // Store prefabs for loading rooms
@@ -38,7 +40,7 @@ public class LevelGenerator : MonoBehaviour
         area = new Area();
         rooms = new Rooms();
         roomElements = new RoomElements();
-        
+
         gridConfiguration = new GridConfiguration();
 
         populateOpenElementsMapper(roomElements.openElements, roomElements.adjoiningOpenElements);
@@ -46,6 +48,7 @@ public class LevelGenerator : MonoBehaviour
         // Rules Setup
         StartAndEndRoomGridPositionRule();
         CornerRoomGridPositionRule();
+        SouthExitOnEachRowRule();
     }
 
     // REFACTORED A LOT OF CODE
@@ -89,9 +92,11 @@ public class LevelGenerator : MonoBehaviour
                     mappedElementsToGridPositions.ElementAt(i).Value.ForEach(j => Debug.Log("       Grid Position = " + mappedElementsToGridPositions.ElementAt(i).Key + "  |     Required Exit = " + j));
                 }*/
             }
+
+            //levelGeneratorDebugger.PrintDictionaryWithVector2KeyAndStringListValue(mappedElementsToGridPositions);
         }
 
-        // PrintContentsOfVector2AndStringDictionary(gridPositionsWithCorrespondingRoomNames);
+        levelGeneratorDebugger.PrintContentsOfVector2AndStringDictionary(gridPositionsWithCorrespondingRoomNames);
 
         // WORKING CODE: THIS MIGHT BE ABLE TO BE PUT INTO A SINGLE METHOD TO CLEAN IT UP
 
@@ -163,6 +168,72 @@ public class LevelGenerator : MonoBehaviour
         cornerRoomGridPositions[3] = new Vector2(GridConfiguration.size - 1, GridConfiguration.size - 1);
     }
 
+    void SouthExitOnEachRowRule()
+    {
+        // Number of Possible Rows and Columns
+        int numberOfPossibleExitsPerRow = (GridConfiguration.size - 2); 
+        //Debug.Log("Number of possible exits: " + numberOfPossibleExitsPerRow);
+        int numberOfRows = (GridConfiguration.size - 1);
+        int minimumNumberOfExitsAllowed = 1;
+
+        for (int i = 0; i < numberOfRows; i++)
+        {
+            int randomlySelectedSouthExits = UnityEngine.Random.Range(minimumNumberOfExitsAllowed, numberOfPossibleExitsPerRow + 1); // + 1 to include the highest number
+            
+            //Debug.Log("Number Of South Exits Selected For Row " + i + " is: " + randomlySelectedSouthExits);
+            
+            List<bool> exitsPerColumn = new List<bool>();
+
+            List<bool> shuffledList = DetermineWhichColumnsHaveExits(numberOfPossibleExitsPerRow, randomlySelectedSouthExits, exitsPerColumn);
+
+            // Inner For loop For Columns
+            // If element in list contains true add 'nc' to dictionary for that position
+            int listElement = 0;
+            for (int j = 1; j <= numberOfPossibleExitsPerRow; j++)
+            {
+                /*Debug.Log("J = " + j);
+                Debug.Log("List Element = " + listElement);*/
+
+                if (shuffledList[listElement] == true)
+                {
+                    Vector2 gridPosition = new Vector2(i,j);
+                    mappedElementsToGridPositions.Add(gridPosition, new List<string>() { "sm" });
+                }
+                listElement++;
+            }
+
+
+        }
+
+        //levelGeneratorDebugger.PrintDictionaryWithVector2KeyAndStringListValue(mappedElementsToGridPositions);
+    }
+
+    List<bool> DetermineWhichColumnsHaveExits(int numberOfPossibleExitsPerRow, int randomlySelectedSouthExits, List<bool> exitsPerColumn)
+    {
+        // Populate List Of Bools Containing Info On Which Columns Have Exits
+        for (int j = 1; j <= numberOfPossibleExitsPerRow; j++)
+        {
+            if (randomlySelectedSouthExits > 0)
+            {
+                exitsPerColumn.Add(true);
+                randomlySelectedSouthExits--;
+            }
+            else
+            {
+                exitsPerColumn.Add(false);
+            }
+        }
+
+        List<bool> shuffled = exitsPerColumn.OrderBy(x => Guid.NewGuid()).ToList();
+
+        /*for (int i = 0; i < exitsPerColumn.Count; i++)
+        {
+            Debug.Log("Element " + i + " is: " + shuffled[i]);
+        }*/
+
+        return shuffled;
+    }
+
     /*
      *      STEP 2: GRID GENERATION
      */
@@ -222,6 +293,11 @@ public class LevelGenerator : MonoBehaviour
         if (mappedElementsToGridPositions.ContainsKey(currentGridPosition))
         {
             elementsRequiredForCurrentGridPosition = mappedElementsToGridPositions[currentGridPosition];
+
+            foreach (string element in elementsRequiredForCurrentGridPosition)
+            {
+                //Debug.Log("Element Required: " + element + " For Grid Position: " + currentGridPosition);
+            }
         }
         else
         {
@@ -246,7 +322,6 @@ public class LevelGenerator : MonoBehaviour
                 // loop though exitsRequiredForCurrentGridPosition and compare each to the room name
                 for (int i = 0; i < elementsRequiredForCurrentGridPosition.Count; i++)
                 {
-
                     // Changed single character elements to be double character elements 
                     // Should provide better visibility for the Contains method
                     // E.G n is now nm
