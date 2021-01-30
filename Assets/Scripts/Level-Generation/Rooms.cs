@@ -13,6 +13,8 @@ public class Rooms
     // Link Room Codes
     public readonly List<string> linkRooms = new List<string> { "lk-nc-eo-sc-wo", "lk-nc-eo-sc-wc", "lk-nc-ec-sc-wo", "lk-nc-eo-sm-wo", "lk-nm-eo-sm-wo", "lk-nm-eo-sc-wo" };
 
+    // New room types will be put here E.G Combat Room
+
     // Start and End Rooms
     readonly List<string> startRooms = new List<string> { "s-1" };
     readonly List<string> endRooms = new List<string> { "e-1" };
