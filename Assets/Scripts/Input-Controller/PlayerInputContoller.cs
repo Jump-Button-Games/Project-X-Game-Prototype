@@ -269,7 +269,7 @@ public class @PlayerInputContoller : IInputActionCollection, IDisposable
                     ""path"": ""<SwitchProControllerHID>/buttonNorth"",
                     ""interactions"": """",
                     ""processors"": """",
-                    ""groups"": ""Switch Pro Controller"",
+                    ""groups"": ""Keyboard and Mouse"",
                     ""action"": ""SelectGun"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
