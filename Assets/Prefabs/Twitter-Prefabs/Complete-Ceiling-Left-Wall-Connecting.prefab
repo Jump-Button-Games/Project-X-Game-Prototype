@@ -609,7 +609,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3801763033745825233, guid: e6dcd4574133b0c419e1427c7ac7aa0d, type: 3}
       propertyPath: m_LocalScale.x
-      value: 0.8
+      value: 0.9
       objectReference: {fileID: 0}
     - target: {fileID: 3801763033745825233, guid: e6dcd4574133b0c419e1427c7ac7aa0d, type: 3}
       propertyPath: m_LocalScale.y
@@ -1309,6 +1309,14 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 5129097069125361727}
     m_Modifications:
+    - target: {fileID: 698395730834755878, guid: ac0acb488d0808f4587564015c2d1a48, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 2.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 698395730834755878, guid: ac0acb488d0808f4587564015c2d1a48, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 2.05
+      objectReference: {fileID: 0}
     - target: {fileID: 1830243504654695003, guid: ac0acb488d0808f4587564015c2d1a48, type: 3}
       propertyPath: m_LocalPosition.x
       value: -4.3892345
@@ -1353,9 +1361,21 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1830243504654695003, guid: ac0acb488d0808f4587564015c2d1a48, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2798876181491046381, guid: ac0acb488d0808f4587564015c2d1a48, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 2.1
+      objectReference: {fileID: 0}
     - target: {fileID: 4339345208477256360, guid: ac0acb488d0808f4587564015c2d1a48, type: 3}
       propertyPath: m_Name
       value: Ceiling-Slant-Large-Left-Side (2)
+      objectReference: {fileID: 0}
+    - target: {fileID: 9039997455493655126, guid: ac0acb488d0808f4587564015c2d1a48, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 2.05
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ac0acb488d0808f4587564015c2d1a48, type: 3}
@@ -1437,6 +1457,14 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 5129097069125361727}
     m_Modifications:
+    - target: {fileID: 698395730834755878, guid: ac0acb488d0808f4587564015c2d1a48, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 2.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 698395730834755878, guid: ac0acb488d0808f4587564015c2d1a48, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 2.05
+      objectReference: {fileID: 0}
     - target: {fileID: 1830243504654695003, guid: ac0acb488d0808f4587564015c2d1a48, type: 3}
       propertyPath: m_LocalPosition.x
       value: -3.7502346
@@ -1484,6 +1512,14 @@ PrefabInstance:
     - target: {fileID: 4339345208477256360, guid: ac0acb488d0808f4587564015c2d1a48, type: 3}
       propertyPath: m_Name
       value: Ceiling-Slant-Large-Left-Side (3)
+      objectReference: {fileID: 0}
+    - target: {fileID: 9039997455493655126, guid: ac0acb488d0808f4587564015c2d1a48, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 2.05
+      objectReference: {fileID: 0}
+    - target: {fileID: 9113106357389880447, guid: ac0acb488d0808f4587564015c2d1a48, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 2.1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ac0acb488d0808f4587564015c2d1a48, type: 3}
@@ -1755,7 +1791,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3801763033745825233, guid: e6dcd4574133b0c419e1427c7ac7aa0d, type: 3}
       propertyPath: m_LocalScale.x
-      value: 0.8
+      value: 0.9
       objectReference: {fileID: 0}
     - target: {fileID: 3801763033745825233, guid: e6dcd4574133b0c419e1427c7ac7aa0d, type: 3}
       propertyPath: m_LocalScale.y
@@ -1977,6 +2013,14 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 5129097069125361727}
     m_Modifications:
+    - target: {fileID: 698395730834755878, guid: ac0acb488d0808f4587564015c2d1a48, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 2.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 698395730834755878, guid: ac0acb488d0808f4587564015c2d1a48, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 2.05
+      objectReference: {fileID: 0}
     - target: {fileID: 1830243504654695003, guid: ac0acb488d0808f4587564015c2d1a48, type: 3}
       propertyPath: m_LocalPosition.x
       value: -5.0322347
@@ -2021,9 +2065,21 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1830243504654695003, guid: ac0acb488d0808f4587564015c2d1a48, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2798876181491046381, guid: ac0acb488d0808f4587564015c2d1a48, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 2.1
+      objectReference: {fileID: 0}
     - target: {fileID: 4339345208477256360, guid: ac0acb488d0808f4587564015c2d1a48, type: 3}
       propertyPath: m_Name
       value: Ceiling-Slant-Large-Left-Side (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 9039997455493655126, guid: ac0acb488d0808f4587564015c2d1a48, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 2.05
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ac0acb488d0808f4587564015c2d1a48, type: 3}
@@ -2295,7 +2351,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3801763033745825233, guid: e6dcd4574133b0c419e1427c7ac7aa0d, type: 3}
       propertyPath: m_LocalScale.x
-      value: 0.8
+      value: 0.9
       objectReference: {fileID: 0}
     - target: {fileID: 3801763033745825233, guid: e6dcd4574133b0c419e1427c7ac7aa0d, type: 3}
       propertyPath: m_LocalScale.y
@@ -2987,6 +3043,14 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 5129097069125361727}
     m_Modifications:
+    - target: {fileID: 698395730834755878, guid: ac0acb488d0808f4587564015c2d1a48, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 2.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 698395730834755878, guid: ac0acb488d0808f4587564015c2d1a48, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 2.05
+      objectReference: {fileID: 0}
     - target: {fileID: 1830243504654695003, guid: ac0acb488d0808f4587564015c2d1a48, type: 3}
       propertyPath: m_LocalPosition.x
       value: -5.6722345
@@ -3031,9 +3095,25 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1830243504654695003, guid: ac0acb488d0808f4587564015c2d1a48, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1830243504654695003, guid: ac0acb488d0808f4587564015c2d1a48, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2798876181491046381, guid: ac0acb488d0808f4587564015c2d1a48, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 2.05
+      objectReference: {fileID: 0}
     - target: {fileID: 4339345208477256360, guid: ac0acb488d0808f4587564015c2d1a48, type: 3}
       propertyPath: m_Name
       value: Ceiling-Slant-Large-Left-Side
+      objectReference: {fileID: 0}
+    - target: {fileID: 9039997455493655126, guid: ac0acb488d0808f4587564015c2d1a48, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 2.05
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ac0acb488d0808f4587564015c2d1a48, type: 3}
