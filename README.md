@@ -1,6 +1,10 @@
 # Project-X-Game-Prototype
 This repository is used to host the prototype created for Project X
 
+# Video of Prototype
+
+[![Watch the demo](https://img.youtube.com/vi/vHcj5wucQUU/maxresdefault.jpg)](https://youtu.be/vHcj5wucQUU)
+
 # Screenshots From Prototype
 
 
